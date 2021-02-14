@@ -5,6 +5,9 @@
 # Session Data files
 .RData
 
+# Data files (only uploaded to OSF)
+/Data/
+
 # User-specific files
 .Ruserdata
 
