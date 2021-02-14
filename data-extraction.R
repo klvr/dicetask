@@ -16,10 +16,10 @@ if(length(files)>0){
     participant[,1] <- as.character(participant[,1])
 
     #StudyID
-    studyid <- strsplit(strsplit(participant1[,1], split = "*studyId:")[[1]][2], split =",")[[1]][1]
+    studyid <- strsplit(strsplit(participant[,1], split = "*studyId:")[[1]][2], split =",")[[1]][1]
 
     #QualtricsID
-    qualtricsid <- strsplit(strsplit(participant1[,1], split = "*qualtricsID: ")[[1]][2], split =",")[[1]][1]
+    qualtricsid <- strsplit(strsplit(participant[,1], split = "*qualtricsID: ")[[1]][2], split =",")[[1]][1]
 
     #Trial1
     #Pre-collection1
@@ -62,16 +62,41 @@ if(length(files)>0){
     #Trial2
     #Pre-collection2
       precoll2 <- strsplit(strsplit(participant[grep(pattern = ":14,", x = participant[,1]),1], split = "value:")[[1]][2], split = "^")[[1]][1]
-    #Dice1
-    #Dice2
-    #Dice3
-    #Dice4
+    #Dice5
+      Dice5DtD <- length(regmatches(grep("[0-9]",strsplit(participant[grep(pattern = ":15,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE), gregexpr("[[:digit:]]+", grep("[0-9]",strsplit(participant[grep(pattern = ":15,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE)))[[1]])
+      Dice5Col <- strsplit(strsplit(participant[grep(pattern = ":15,", x = participant[,1]),1][2], split = "color:")[[1]][2], split = ",sequence")[[1]][1]
+      Dice5Load <- strsplit(strsplit(participant[grep(pattern = ":16,", x = participant[,1]),1], split = "q1,value:")[[1]][2], split = "^")[[1]][1]
+      Dice5LoadCert <- strsplit(strsplit(participant[grep(pattern = ":16,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][1]
+      if(Dice5LoadCert == 1){Dice5LoadCert2 <- strsplit(strsplit(participant[grep(pattern = ":16,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][2]}
+      if(Dice5LoadCert2 == 0){Dice5LoadCert <- paste(as.numeric(Dice5LoadCert), as.numeric(Dice5LoadCert2), sep="")}
+      if(Dice5Load == 0){Dice5LoadWhat <- strsplit(strsplit(participant[grep(pattern = ":16,", x = participant[,1]),1], split = "q3,value:")[[1]][2], split = "^")[[1]][1]}else{Dice5LoadWhat <- "9"}
+    #Dice6
+      Dice6DtD <- length(regmatches(grep("[0-9]",strsplit(participant[grep(pattern = ":17,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE), gregexpr("[[:digit:]]+", grep("[0-9]",strsplit(participant[grep(pattern = ":17,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE)))[[1]])
+      Dice6Col <- strsplit(strsplit(participant[grep(pattern = ":17,", x = participant[,1]),1][2], split = "color:")[[1]][2], split = ",sequence")[[1]][1]
+      Dice6Load <- strsplit(strsplit(participant[grep(pattern = ":18,", x = participant[,1]),1], split = "q1,value:")[[1]][2], split = "^")[[1]][1]
+      Dice6LoadCert <- strsplit(strsplit(participant[grep(pattern = ":18,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][1]
+      if(Dice6LoadCert == 1){Dice6LoadCert2 <- strsplit(strsplit(participant[grep(pattern = ":18,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][2]}
+      if(Dice6LoadCert2 == 0){Dice6LoadCert <- paste(as.numeric(Dice6LoadCert), as.numeric(Dice6LoadCert2), sep="")}
+      if(Dice6Load == 0){Dice6LoadWhat <- strsplit(strsplit(participant[grep(pattern = ":18,", x = participant[,1]),1], split = "q3,value:")[[1]][2], split = "^")[[1]][1]}else{Dice6LoadWhat <- "9"}
+    #Dice7
+      Dice7DtD <- length(regmatches(grep("[0-9]",strsplit(participant[grep(pattern = ":19,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE), gregexpr("[[:digit:]]+", grep("[0-9]",strsplit(participant[grep(pattern = ":19,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE)))[[1]])
+      Dice7Col <- strsplit(strsplit(participant[grep(pattern = ":19,", x = participant[,1]),1][2], split = "color:")[[1]][2], split = ",sequence")[[1]][1]
+      Dice7Load <- strsplit(strsplit(participant[grep(pattern = ":20,", x = participant[,1]),1], split = "q1,value:")[[1]][2], split = "^")[[1]][1]
+      Dice7LoadCert <- strsplit(strsplit(participant[grep(pattern = ":20,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][1]
+      if(Dice7LoadCert == 1){Dice7LoadCert2 <- strsplit(strsplit(participant[grep(pattern = ":20,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][2]}
+      if(Dice7LoadCert2 == 0){Dice7LoadCert <- paste(as.numeric(Dice7LoadCert), as.numeric(Dice7LoadCert2), sep="")}
+      if(Dice7Load == 0){Dice7LoadWhat <- strsplit(strsplit(participant[grep(pattern = ":20,", x = participant[,1]),1], split = "q3,value:")[[1]][2], split = "^")[[1]][1]}else{Dice7LoadWhat <- "9"}
+    #Dice8
+      Dice8DtD <- length(regmatches(grep("[0-9]",strsplit(participant[grep(pattern = ":21,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE), gregexpr("[[:digit:]]+", grep("[0-9]",strsplit(participant[grep(pattern = ":21,", x = participant[,1]),1][2], split = "color:")[[1]][2], value = TRUE)))[[1]])
+      Dice8Col <- strsplit(strsplit(participant[grep(pattern = ":21,", x = participant[,1]),1][2], split = "color:")[[1]][2], split = ",sequence")[[1]][1]
+      Dice8Load <- strsplit(strsplit(participant[grep(pattern = ":22,", x = participant[,1]),1], split = "q1,value:")[[1]][2], split = "^")[[1]][1]
+      Dice8LoadCert <- strsplit(strsplit(participant[grep(pattern = ":22,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][1]
+      if(Dice8LoadCert == 1){Dice8LoadCert2 <- strsplit(strsplit(participant[grep(pattern = ":22,", x = participant[,1]),1], split = "q2,value:")[[1]][2], split = "^")[[1]][2]}
+      if(Dice8LoadCert2 == 0){Dice8LoadCert <- paste(as.numeric(Dice8LoadCert), as.numeric(Dice8LoadCert2), sep="")}
+      if(Dice8Load == 0){Dice8LoadWhat <- strsplit(strsplit(participant[grep(pattern = ":22,", x = participant[,1]),1], split = "q3,value:")[[1]][2], split = "^")[[1]][1]}else{Dice8LoadWhat <- "9"}
     #Final choice
+      Trial2LoadedDice <- strsplit(strsplit(participant[grep(pattern = ":23,", x = participant[,1]),1], split = "value:")[[1]][2], split = "^")[[1]][1]
 
-    #Trial3
-
-    #Trial4
-    
     cases <- cases[-1]
   }
   files <- files[-1]
