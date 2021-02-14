@@ -1,5 +1,8 @@
 #Data-extraction Dice-task
 
+##2-do
+#Must add "componentPos" in pattern-matching, so meta-data doesn't get matched by accident
+
 #Load files
 filepath <- paste(getwd(), "/data/", sep="")
 files <- paste(filepath, list.files(filepath), sep="")
