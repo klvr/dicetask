@@ -7,6 +7,8 @@
 
 # Data files (only uploaded to OSF)
 /Data/
+/data/
+/Cleaned data/
 
 # User-specific files
 .Ruserdata
