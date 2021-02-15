@@ -100,6 +100,7 @@ if(length(files)>0){
     #Final choice
       Trial2LoadedDice <- strsplit(strsplit(participant[grep(pattern = "componentPos:23,", x = participant[,1]),1], split = "value:")[[1]][2], split = "^")[[1]][1]
 
+    participant <- cbind(qualtricsid, studyid, Dice1Col, Dice1DtD, Dice1Load, Dice1LoadCert, Dice1LoadWhat, Dice2Col, Dice2DtD, Dice2Load, Dice2LoadCert, Dice2LoadWhat, Dice3Col, Dice3DtD, Dice3Load, Dice3LoadCert, Dice3LoadWhat, Dice4Col, Dice4DtD, Dice4Load, Dice4LoadCert, Dice4LoadWhat, Dice5Col, Dice5DtD, Dice5Load, Dice5LoadCert, Dice5LoadWhat, Dice6Col, Dice6DtD, Dice6Load, Dice6LoadCert, Dice6LoadWhat, Dice7Col, Dice7DtD, Dice7Load, Dice7LoadCert, Dice7LoadWhat, Dice8Col, Dice8DtD, Dice8Load, Dice8LoadCert, Dice8LoadWhat, precoll1, precoll2, Trial1LoadedDice, Trial2LoadedDice)
     cases <- cases[-1]
   }
   files <- files[-1]
