@@ -2,6 +2,9 @@
 /article_2/
 /article_3/
 
+# Presentations
+/presentations/
+
 # History files
 .Rhistory
 .Rapp.history
