@@ -29,21 +29,26 @@ recodeSingle <- function(x, c, h = "heuristic") {
   x <- as.numeric(x)
 }
 
-# Spesific multi-response items --------------------------------------------------------------------
+# Specific multi-response items --------------------------------------------------------------------
 
 # Cups and die item - Probability matching
 # Input: 10 columns of responses (Blue cup, Yellow cup)
-# Arguments: With or without heuristic response conding (i.e., probability matching)
-# Use: df[,pm1] <- recodeProbabilityMatching(df[,c(pm1:pm10)]
-recodeProbabilityMatching <- function(pm, hc = "FALSE") {
-  convert <- function(a) {
-    if (a == "Blue cup") {a <- 1} else {a <- 0}
-    }
-  if (hc) {
-  } else {
-    for (i in pm) {
-      lapply(pm[,i], convert)
-    }
+# Arguments: Heuristic coding on/off (hc), majority colour (maj; not case sensitive)
+# Output: 1: Correct, 0: Incorrect, -1: Probability matching (if TRUE), NA: No response
+# Use: df[,pm1] <- recodeProbabilityMatching(pm = df[,c(pm1:pm10)], maj = "Blue cup", hc = "FALSE")
+recodeProbabilityMatching <- function(pm, maj = "Blue cup", hc = "FALSE") {
+  maj <- toupper(maj)
+  for (i in 1:ncol(pm)) {
+    pm[,i] <- as.character(pm[,i])
+    pm[,i] <- toupper(pm[,i])
   }
-  print(pm)
+  pm <- pm
+  pm <- replace(pm, pm==maj, 1)
+  pm <- replace(pm, pm=="", NA)
+  pm <- replace(pm, pm>1, 0)
+  pm <- sapply(pm, as.numeric)
+  pm <- rowSums(pm)
+  if (hc == TRUE) {pm <- replace(pm, pm==7, -1)}
+  pm <- replace(pm, pm==10, 1)
+  pm <- replace(pm, pm>2, 0)
 }
