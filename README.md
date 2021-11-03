@@ -16,7 +16,7 @@
     │
     └───data/ - Real data not pushed to GitHub, see [OpenScienceFramework](www.osf.com/LINK). 
     │
-    └───data_dummy/ - Contains identical file-structure, name, and number of files as the real data.
+    └───data_dummy/ - Contains identical file-structure, name, and number of files as the data.
     │   │
     │   └───processed/ - All processed data files from scripts are saved here.
     │   │    
