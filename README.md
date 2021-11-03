@@ -42,7 +42,6 @@
     │   │       └───students/ - From student sample.
     │   │           qualtrics_students_1.csv  - Student qualtrics form part 1 file.
     │   │           qualtrics_students_2.csv  - Student qualtrics form part 2 file.
-    │   │           qualtrics_students_2b.csv - Student qualtrics form part 2 (uncomplete) file.
     │   │           qualtrics_students_3.csv  - Student qualtrics form part 3 file.
     │   │
     │   │   
@@ -50,4 +49,9 @@
     │
     └───output/ - All output files (excluding pure processed data files).
     │
-    └───src/ - All script files.
+    └───presentations/ - Markdown files for presentations.
+    │
+    └───src/ - All script files (function, extraction, clearning, analyses and plots).
+        recoding.cape.R - Function-script for recoding and summary of CAPE.
+        recoding.nfc.R  - Function-script for recoding and summary of NfC.
+        recoding.rq.R   - Function-script for recoding of RQ items.
