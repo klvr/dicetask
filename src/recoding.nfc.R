@@ -4,7 +4,7 @@
 ####################################################################################################
 
 # Short-version (18 item) Need for Cognition -------------------------------------------------------
-# Input: Column of responses (x)
+# Input: Columns of responses (x)
 # Arguments: Reversed items (revi; sequence of; defaults to items 3,4,5,7,8,9,12,16 & 17)
 # Output: Summary score NfC
 # Use: df[,x] <- recodeNFC(x = df[,c(x1:x18], revi = c(3,4,5,7,8,9,12,16,17)
