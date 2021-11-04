@@ -19,7 +19,8 @@
     └───data_dummy/ - Contains identical file-structure, name, and number of files as the data.
     │   │
     │   └───processed/ - All processed data files from scripts are saved here.
-    │   │    
+    │   │   Happens automatically when running scripts. This section will not be updated.
+    │   │
     │   └───raw/ - All raw output files from the experiments. Treated as read-only.
     │   │   │
     │   │   └───jatos/ - All raw output files from jatos.
@@ -46,12 +47,14 @@
     │   │
     │   │   
     │   └───temp/ - Temporary files from scripts, to be used by scripts.
+    │       Happens automatically when running scripts. This section will not be updated.
     │
     └───output/ - All output files (excluding pure processed data files).
     │
-    └───presentations/ - Markdown files for presentations.
+    └───presentations/ - Not pushed to GitHub, markdown files for presentations.
     │
     └───src/ - All script files (function, extraction, clearning, analyses and plots).
+        │   qualtrics_cleanup.R - Script for cleaning up qualtrics files before extraction.
         │
         └───functions/ - Functions scripts.
         │   recoding.cape.R   - Function-script for recoding and summary of CAPE.
