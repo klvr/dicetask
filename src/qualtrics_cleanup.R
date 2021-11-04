@@ -94,11 +94,11 @@ colnames(metaStudents) <- c("removed", "reason")
 # 06 Saving of temp-data and meta-data -------------------------------------------------------------
 
 # Saving temp files
-write.csv(qualtrics_prolific, file = "data/temp/qualtrics_prolific.csv")
-write.csv(qualtrics_students_1, file = "data/temp/qualtrics_students_1.csv")
-write.csv(qualtrics_students_2, file = "data/temp/qualtrics_students_2.csv")
-write.csv(qualtrics_students_3, file = "data/temp/qualtrics_students_3.csv")
+write.csv(qualtrics_prolific, file = "data/temp/qualtrics_prolific.csv", row.names = FALSE)
+write.csv(qualtrics_students_1, file = "data/temp/qualtrics_students_1.csv", row.names = FALSE)
+write.csv(qualtrics_students_2, file = "data/temp/qualtrics_students_2.csv", row.names = FALSE)
+write.csv(qualtrics_students_3, file = "data/temp/qualtrics_students_3.csv", row.names = FALSE)
 
 # Saving meta files
-write.csv(metaProlific, file = "data/processed/meta_prolific.csv")
-write.csv(metaStudents, file = "data/processed/meta_students.csv")
+write.csv(metaProlific, file = "data/processed/meta_prolific.csv", row.names = FALSE)
+write.csv(metaStudents, file = "data/processed/meta_students.csv", row.names = FALSE)
