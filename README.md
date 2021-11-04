@@ -52,6 +52,12 @@
     └───presentations/ - Markdown files for presentations.
     │
     └───src/ - All script files (function, extraction, clearning, analyses and plots).
-        recoding.cape.R - Function-script for recoding and summary of CAPE.
-        recoding.nfc.R  - Function-script for recoding and summary of NfC.
-        recoding.rq.R   - Function-script for recoding of RQ items.
+        │
+        └───functions/ - Functions scripts.
+        │   recoding.cape.R   - Function-script for recoding and summary of CAPE.
+        │   recoding.gender.R - Function-script for recoding gender. 
+        │   recoding.nfc.R    - Function-script for recoding and summary of NfC.
+        │   recoding.rq.R     - Function-script for recoding of RQ items.
+        │   recoding.time.R   - Function-script for recoding time on page.
+        │
+        └───other/
