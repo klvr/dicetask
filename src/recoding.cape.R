@@ -1,9 +1,9 @@
 ####################################################################################################
-# Function-script for recoding and summary variable creation for CAPE                              #                                                                  #
+# Function-script for recoding and summary variable creation for CAPE                              #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 
-# Full version (42 item) Community Assessment of Psychic Experiences--------------------------------
+# Full version (42 item) Community Assessment of Psychic Experiences -------------------------------
 # Input: Columns of responses (x)
 # Arguments: Positive items   (pos; sequence of; defaults to items 2, 5, 6, 7, 10, 11, 13, 15, 17,
 #                              20, 23, 25, 27, 29, 31, 33, 35, 36, 44 & 45)

@@ -1,5 +1,5 @@
 ####################################################################################################
-# Function-script for recoding and summary variable creation for RQ-items                          #                                                                  #
+# Function-script for recoding and summary variable creation for RQ-items                          #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 

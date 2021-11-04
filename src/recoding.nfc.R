@@ -1,5 +1,5 @@
 ####################################################################################################
-# Function-script for recoding and summary variable creation for Need for Cognition                #                                                                  #
+# Function-script for recoding and summary variable creation for Need for Cognition                #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 
