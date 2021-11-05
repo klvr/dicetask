@@ -74,6 +74,70 @@ prolific_fdc <- qualtrics_prolific[,c(1,151:160)]
 prolific_fdcTime <- qualtrics_prolific[,c(1, 147:150)]
 
 # 03 Extraction Students ---------------------------------------------------------------------------
+
+# Extract Misc
+students_misc <- qualtrics_students_1[,c(8, 2, 10, 9, 1)]
+
+# Extract Condition / Sequence info
+students_condA <- qualtrics_students_1[,c(8, 288:291)]
+students_condB <- qualtrics_students_2[,c(292, 303, 304)]
+
+# Extract RQ
+students_rqA <- qualtrics_students_1[,c(8, 208, 232:241, 265)]
+students_rqB <- qualtrics_students_2[,c(292, 197, 221:230, 254)]
+
+# Extract RQ times
+timeItem1A <- c(208,232,265)-4
+timeItem2A <- c(208,232,265)-3
+timeItem3A <- c(208,232,265)-2
+timeItem4A <- c(208,232,265)-1
+timeItem1B <- c(197,221,254)-4
+timeItem2B <- c(197,221,254)-3
+timeItem3B <- c(197,221,254)-2
+timeItem4B <- c(197,221,254)-1
+timeItemsA <- sort(c(timeItem1A, timeItem2A, timeItem3A, timeItem4A))
+timeItemsB <- sort(c(timeItem1B, timeItem2B, timeItem3B, timeItem4B))
+students_rqTimeA <- qualtrics_students_1[,c(8, timeItemsA)]
+students_rqTimeB <- qualtrics_students_2[,c(292, timeItemsB)]
+
+# Extract NfC
+students_nfcA <- qualtrics_students_1[,c(8, 270:287)]
+students_nfcB <- qualtrics_students_2[,c(292, 259:276)]
+
+# Extract NfC times
+students_nfcTimeA <- qualtrics_students_1[,c(8, 266:269)]
+students_nfcTimeB <- qualtrics_students_2[,c(292, 255:258)]
+
+# Extract Risk
+students_risk <- qualtrics_students_1[,c(8, 11)]
+
+# Extract Mood
+students_mood <- qualtrics_students_1[,c(8, 7)]
+
+# Extract NTLX & Debrief
+
+# Extract CAPE
+students_capeA <- qualtrics_students_1[,c(8, 189:203,213:227,246:260)]
+students_capeB <- qualtrics_students_2[,c(292, 178:192, 202:216, 235:249)]
+
+# Extract CAPE times
+timeItem1A <- c(189,213,246)-4
+timeItem2A <- c(189,213,246)-3
+timeItem3A <- c(189,213,246)-2
+timeItem4A <- c(189,213,246)-1
+timeItem1B <- c(178,202,235)-4
+timeItem2B <- c(178,202,235)-3
+timeItem3B <- c(178,202,235)-2
+timeItem4B <- c(178,202,235)-1
+timeItemsA <- sort(c(timeItem1A, timeItem2A, timeItem3A, timeItem4A))
+timeItemsB <- sort(c(timeItem1B, timeItem2B, timeItem3B, timeItem4B))
+students_capeTimeA <- qualtrics_students_1[,c(8, timeItemsA)]
+students_capeTimeB <- qualtrics_students_2[,c(292, timeItemsB)]
+
+# Extract Beads
+
+# Extract Beads time
+
 # 04 Recoding Prolific -----------------------------------------------------------------------------
 
 # Variable names and sequences
