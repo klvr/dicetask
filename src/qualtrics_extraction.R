@@ -1,8 +1,7 @@
 ####################################################################################################
 # Extracts and summarises Qualtrics data (Prolific and Students)                                   #
 # Input: Qualtrics temp data (from qualtrics_cleanup.R)                                            #
-# Output: Csv-files containing extracted data (temp)                                               #
-# Meta-output: Outputs a meta-file on relevant data removed (e.g., due to no consent)              #
+# Output: Csv-files containing extracted data (full), and summary-data                             #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 
