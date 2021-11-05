@@ -76,7 +76,8 @@ prolific_fdcTime <- qualtrics_prolific[,c(1, 147:150)]
 # 03 Extraction Students ---------------------------------------------------------------------------
 
 # Extract Misc
-students_misc <- qualtrics_students_1[,c(8, 2, 10, 9, 1)]
+students_miscA <- qualtrics_students_1[,c(8, 2, 10, 9, 1)]
+students_miscB <- qualtrics_students_2[,c(292, 297, 302)]
 
 # Extract Condition / Sequence info
 students_condA <- qualtrics_students_1[,c(8, 288:291)]
@@ -115,6 +116,10 @@ students_risk <- qualtrics_students_1[,c(8, 11)]
 students_mood <- qualtrics_students_1[,c(8, 7)]
 
 # Extract NTLX & Debrief
+students_beadsNTLXA <- qualtrics_students_1[,c(8, 174:179)]
+students_beadsNTLXB <- qualtrics_students_2[,c(292, 163:168)]
+students_beadsDiffA <- qualtrics_students_1[,c(8, 184)]
+students_beadsDiffB <- qualtrics_students_2[,c(292, 173)]
 
 # Extract CAPE
 students_capeA <- qualtrics_students_1[,c(8, 189:203,213:227,246:260)]
@@ -135,6 +140,30 @@ students_capeTimeA <- qualtrics_students_1[,c(8, timeItemsA)]
 students_capeTimeB <- qualtrics_students_2[,c(292, timeItemsB)]
 
 # Extract Beads
+## Split over two different response types, and either before or after dice
+## Condition info save in students_cond
+items1AA <- seq(20,83,7)
+items2AA <- seq(20,83,7)+1
+items3AA <- seq(20,83,7)+2
+items1BA <- seq(9,72,7)
+items2BA <- seq(9,72,7)+1
+items3BA <- seq(9,72,7)+2
+items1AB <- seq(94,169,8)
+items2AB <- seq(94,169,8)+1
+items3AB <- seq(94,169,8)+2
+items4AB <- seq(94,169,8)+3
+items1BB <- seq(83,158,8)
+items2BB <- seq(83,158,8)+1
+items3BB <- seq(83,158,8)+2
+items4BB <- seq(83,158,8)+3
+itemsAA <- sort(c(items1AA, items2AA, items3AA))
+itemsBA <- sort(c(items1BA, items2BA, items3BA))
+itemsAB <- sort(c(items1AB, items2AB, items3AB, items4AB))
+itemsBB <- sort(c(items1BB, items2BB, items3BB, items4BB))
+students_beadsAA <- qualtrics_students_1[,c(8, itemsAA)]
+students_beadsBA <- qualtrics_students_2[,c(292, itemsBA)]
+students_beadsAB <- qualtrics_students_1[,c(8, itemsAB)]
+students_beadsBB <- qualtrics_students_2[,c(292, itemsBB)]
 
 # Extract Beads time
 
