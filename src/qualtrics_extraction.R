@@ -426,7 +426,7 @@ students_nfcTimeA[,-1] <- recodeTime(students_nfcTimeA[,-1])
 students_nfcTimeB[,-1] <- recodeTime(students_nfcTimeB[,-1])
 ## Variable names
 colnames(students_nfcTimeA) <- c(namesMisc[1], "nfcTimeOT", "nfcTimeFL", "nfcTimeLS", "nfcTimeCM")
-colnames(students_nfcTimeA) <- c(namesMisc[1], "nfcTimeOT", "nfcTimeFL", "nfcTimeLS", "nfcTimeCM")
+colnames(students_nfcTimeB) <- c(namesMisc[1], "nfcTimeOT", "nfcTimeFL", "nfcTimeLS", "nfcTimeCM")
 
 # Risk
 ## Variable names
@@ -472,6 +472,9 @@ colnames(students_beadsDiffA) <- c(namesMisc[1], paste("beads",namesSelfRep[8], 
 colnames(students_beadsDiffB) <- c(namesMisc[1], paste("beads",namesSelfRep[8], "B", sep=""))
 colnames(students_diceDiff) <- c(namesMisc[1], paste("dice", namesSelfRep[8], sep=""))
 
+# CAPE
+## Recode answers into 1: Never, 4: Nearly always # To match others using CAPE (so not 0 index)
+## Create summary variables for P, N and D sub-scales, and control items
 
 
 # 06 Summary variable creation Prolific ------------------------------------------------------------
@@ -528,6 +531,15 @@ qualtrics_prolific <- cbind(prolific_misc, prolific_rq[,-1], prolific_rqTime[,-1
                             prolific_rqDebrief[,-1], prolific_rqNTLX[,-1], prolific_nfc[,-1], 
                             prolific_nfcTime[,-1], prolific_bnt[,-1], prolific_bntTime[,-1], 
                             prolific_fdc[,-1], prolific_fdcTime[,-1])
+
+# Fixing three missing colnames due to merging
+oldNameNfc <- "prolific_nfc[, -1]"
+newNameNfc <- "nfcScore"
+oldNameBnt <- "prolific_bnt[, 6]"
+newNameBnt <- "bntScore"
+names(qualtrics_prolific)[names(qualtrics_prolific) == oldNameNfc] <- newNameNfc
+names(qualtrics_prolific_summary)[names(qualtrics_prolific_summary) == oldNameNfc] <- newNameNfc
+names(qualtrics_prolific_summary)[names(qualtrics_prolific_summary) == oldNameBnt] <- newNameBnt
 
 # Write to CSV
 write.csv(qualtrics_prolific, "data/processed/qualtrics_prolific.csv")
