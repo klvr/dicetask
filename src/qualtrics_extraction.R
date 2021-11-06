@@ -73,6 +73,9 @@ prolific_fdc <- qualtrics_prolific[,c(1,151:160)]
 # Extract 5DCuriosity times
 prolific_fdcTime <- qualtrics_prolific[,c(1, 147:150)]
 
+# Extract NTLX
+prolific_rqNTLX <- qualtrics_prolific[,c(1, 75:81)]
+
 # 03 Extraction Students ---------------------------------------------------------------------------
 
 # Extract Misc
@@ -115,9 +118,9 @@ students_risk <- qualtrics_students_1[,c(8, 11)]
 # Extract Mood
 students_mood <- qualtrics_students_1[,c(8, 7)]
 
-# Extract NTLX & Debrief
-students_beadsNTLXA <- qualtrics_students_1[,c(8, 174:179)]
-students_beadsNTLXB <- qualtrics_students_2[,c(292, 163:168)]
+# Extract NTLX & Debrief Beads
+students_beadsNTLXA <- qualtrics_students_1[,c(8, 174, 175, 176, 179, 178, 177)] #Match Prolific
+students_beadsNTLXB <- qualtrics_students_2[,c(292, 163, 164, 165, 168, 167, 166)] #Match Prolific
 students_beadsDiffA <- qualtrics_students_1[,c(8, 184)]
 students_beadsDiffB <- qualtrics_students_2[,c(292, 173)]
 
@@ -166,6 +169,34 @@ students_beadsAB <- qualtrics_students_1[,c(8, itemsAB)]
 students_beadsBB <- qualtrics_students_2[,c(292, itemsBB)]
 
 # Extract Beads time
+items1AA <- seq(20,83,7)-4
+items2AA <- seq(20,83,7)-3
+items3AA <- seq(20,83,7)-2
+items4AA <- seq(20,83,7)-1
+items1BA <- seq(9,72,7)-4
+items2BA <- seq(9,72,7)-3
+items3BA <- seq(9,72,7)-2
+items4BA <- seq(9,72,7)-1
+items1AB <- seq(94,169,8)-4
+items2AB <- seq(94,169,8)-3
+items3AB <- seq(94,169,8)-2
+items4AB <- seq(94,169,8)-1
+items1BB <- seq(83,158,8)-4
+items2BB <- seq(83,158,8)-3
+items3BB <- seq(83,158,8)-2
+items4BB <- seq(83,158,8)-1
+itemsAA <- sort(c(items1AA, items2AA, items3AA, items4AA))
+itemsBA <- sort(c(items1BA, items2BA, items3BA, items4BA))
+itemsAB <- sort(c(items1AB, items2AB, items3AB, items4AB))
+itemsBB <- sort(c(items1BB, items2BB, items3BB, items4BB))
+students_beadsTimeAA <- qualtrics_students_1[,c(8, itemsAA)]
+students_beadsTimeBA <- qualtrics_students_2[,c(292, itemsBA)]
+students_beadsTimeAB <- qualtrics_students_1[,c(8, itemsAB)]
+students_beadsTimeBB <- qualtrics_students_2[,c(292, itemsBB)]
+
+# Extract NTLX & Debrief Dice
+students_diceNTLX <- qualtrics_students_2[,c(292, 281, 282, 283, 286, 285, 284)]
+students_diceDiff <- qualtrics_students_2[,c(292, 291)]
 
 # 04 Recoding Prolific -----------------------------------------------------------------------------
 
@@ -313,7 +344,136 @@ prolific_fdcTime[,-1] <- recodeTime(prolific_fdcTime[,-1])
 ## Variable names
 colnames(prolific_fdcTime) <- c(namesMisc[1], "fdcTimeOT", "fdcTimeFL", "fdcTimeLS", "fdcTimeCM")
 
+# NTLX RQ
+colnames(prolific_rqNTLX) <- c(namesMisc[1], paste("rq", namesNTLX, sep=""))
+
 # 05 Recoding Students -----------------------------------------------------------------------------
+
+# Variable names and sequences
+namesTime <- c("timeOnPage","timeFirstLast","timeLastSubmit","clicksAboveMin")
+namesRQ <- c("rqKnight","rqProbMatch","rqHospital")
+namesNTLX <- c("ntlxMental","ntlxPhysical","ntlxTempo","ntlxFrust","ntlxEffort","ntlxPerf")
+namesSelfRep <- c("nfcScore", "capeP", "capeN", "capeD", "capeC", "mood", "risk", "Diff")
+namesMisc <- c("ID","Browser","Gender", "Age", "Lang")
+namesBeadsA <- c("ProbMin", "ProbMaj", "Choice")
+namesBeadsB <- c("Choice", "ProbMin", "ProbMaj", "Choice")
+
+# Misc
+## Recode Browser into 1: Problematic for Dice (Safari, Edge, mobile device), 0: No problem
+prob1 <- grepl(students_miscA[,2], pattern = "Edge")
+prob2 <- grepl(students_miscA[,2], pattern = "Safari")
+prob3 <- grepl(students_miscA[,2], pattern = "iP")
+students_miscA[,2] <- as.numeric(((prob1+prob2+prob3) > 0))
+## Recode gender
+students_miscA[,3] <- recodeGender(students_miscA[,3])
+## Recode Fish/condtion catch
+students_miscB[,2] <- recodeSingle(students_miscB[,2], c = "Yes") #1: Played before, 0: Not
+## Variable names
+colnames(students_miscA) <- namesMisc
+colnames(students_miscB) <- c(namesMisc[1], "playedB", "nFish")
+
+# RQ items
+## Recode into correct (1) and incorrect (0)
+students_rqA[,2] <- recodeSingle(students_rqA[,2], c = "A knave")
+students_rqB[,2] <- recodeSingle(students_rqB[,2], c = "A knave")
+students_rqA[,3] <- recodeProbabilityMatching(students_rqA[,3:12], hc = TRUE)
+students_rqB[,3] <- recodeProbabilityMatching(students_rqB[,3:12], hc = TRUE)
+students_rqA[,13] <- recodeSingle(students_rqA[,13], c = "The smaller hospital")
+students_rqB[,13] <- recodeSingle(students_rqB[,13], c = "The smaller hospital")
+## Remove leftover PM items
+students_rqA <- students_rqA[,-c(4:12)]
+students_rqB <- students_rqB[,-c(4:12)]
+## Variable names
+colnames(students_rqA) <- c(namesMisc[1], namesRQ)
+colnames(students_rqB) <- c(namesMisc[1], namesRQ)
+
+# RQ times
+## Recode times into overall time (OT), first action to submit (FS), last action to submit (LS),
+## and clicks above minimum (CM)
+timingAll <- NULL
+for (i in seq(2,10,4)) {
+  timingItem <- recodeTime(students_rqTimeA[i:(i+3)])
+  timingAll <- cbind(timingAll, timingItem)
+}
+students_rqTimeA <- as.data.frame(cbind(students_rqTimeA[,1], timingAll))
+timingAll <- NULL
+for (i in seq(2,10,4)) {
+  timingItem <- recodeTime(students_rqTimeB[i:(i+3)])
+  timingAll <- cbind(timingAll, timingItem)
+}
+students_rqTimeB <- as.data.frame(cbind(students_rqTimeB[,1], timingAll))
+## Variable names
+colnames(students_rqTimeA) <- c(namesMisc[1], paste(rep(namesRQ, each=4), 
+                              rep(c("TimeOT", "TimeFS", "TimeLS", "TimeCM")), sep=""))
+colnames(students_rqTimeB) <- c(namesMisc[1], paste(rep(namesRQ, each=4), 
+                              rep(c("TimeOT", "TimeFS", "TimeLS", "TimeCM")), sep=""))
+
+# NfC
+## Calculate summary score
+students_nfcA[,2] <- recodeNFC(students_nfcA[,-1])
+students_nfcB[,2] <- recodeNFC(students_nfcB[,-1])
+## Remove individual items
+students_nfcA <- students_nfcA[,1:2]
+students_nfcB <- students_nfcB[,1:2]
+## Variable names
+colnames(students_nfcA) <- c(namesMisc[1], namesSelfRep[1])
+colnames(students_nfcB) <- c(namesMisc[1], namesSelfRep[1])
+
+# NfC times
+## Recode times into overall time (OT), first action to submit (FS), last action to submit (LS),
+## and clicks above minimum (CM)
+students_nfcTimeA[,-1] <- recodeTime(students_nfcTimeA[,-1])
+students_nfcTimeB[,-1] <- recodeTime(students_nfcTimeB[,-1])
+## Variable names
+colnames(students_nfcTimeA) <- c(namesMisc[1], "nfcTimeOT", "nfcTimeFL", "nfcTimeLS", "nfcTimeCM")
+colnames(students_nfcTimeA) <- c(namesMisc[1], "nfcTimeOT", "nfcTimeFL", "nfcTimeLS", "nfcTimeCM")
+
+# Risk
+## Variable names
+colnames(students_risk) <- c(namesMisc[1], namesSelfRep[7])
+
+# Mood
+## Variable names
+colnames(students_mood) <- c(namesMisc[1], namesSelfRep[6])
+
+# NTLX Beads & Dice
+## Variable names
+colnames(students_beadsNTLXA) <- c(namesMisc[1], paste("beads", namesNTLX, sep=""))
+colnames(students_beadsNTLXB) <- c(namesMisc[1], paste("beads", namesNTLX, sep=""))
+colnames(students_diceNTLX) <- c(namesMisc[1], paste("dice", namesNTLX, sep=""))
+
+# Diff Beads & Dice
+## Recode answers into 0: Extremely easy, to, 6: Extremely difficult
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Extremely easy", 0)
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Moderately easy", 1)
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Slightly easy", 2)
+students_beadsDiffA <- replace(students_beadsDiffA, 
+                               students_beadsDiffA=="Neither easy nor difficult", 3)
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Slightly difficult", 4)
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Moderately difficult", 5)
+students_beadsDiffA <- replace(students_beadsDiffA, students_beadsDiffA=="Extremely difficult", 6)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Extremely easy", 0)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Moderately easy", 1)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Slightly easy", 2)
+students_beadsDiffB <- replace(students_beadsDiffB, 
+                               students_beadsDiffB=="Neither easy nor difficult", 3)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Slightly difficult", 4)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Moderately difficult", 5)
+students_beadsDiffB <- replace(students_beadsDiffB, students_beadsDiffB=="Extremely difficult", 6)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Extremely easy", 0)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Moderately easy", 1)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Slightly easy", 2)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Neither easy nor difficult", 3)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Slightly difficult", 4)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Moderately difficult", 5)
+students_diceDiff <- replace(students_diceDiff, students_diceDiff=="Extremely difficult", 6)
+## Variable names
+colnames(students_beadsDiffA) <- c(namesMisc[1], paste("beads",namesSelfRep[8], "A", sep=""))
+colnames(students_beadsDiffB) <- c(namesMisc[1], paste("beads",namesSelfRep[8], "B", sep=""))
+colnames(students_diceDiff) <- c(namesMisc[1], paste("dice", namesSelfRep[8], sep=""))
+
+
+
 # 06 Summary variable creation Prolific ------------------------------------------------------------
 
 # Summary variables
@@ -360,14 +520,14 @@ prolific_bntTime <- cbind(prolific_bntTime, bntTimeOTOverall, bntTimeFLOverall, 
 
 # Simplified summary file
 qualtrics_prolific_summary <- cbind(prolific_misc, prolific_rq[,16:17], prolific_rqTime[,58:69], 
-                              prolific_rqDebrief[,-1], prolific_nfc[,-1], prolific_nfcTime[,-1],
-                              prolific_bnt[,6], prolific_bntTime[,18:21], prolific_fdc[,-1], 
-                              prolific_fdcTime[,-1])
+                              prolific_rqDebrief[,-1], prolific_rqNTLX[,-1], prolific_nfc[,-1], 
+                              prolific_nfcTime[,-1], prolific_bnt[,6], prolific_bntTime[,18:21], 
+                              prolific_fdc[,-1], prolific_fdcTime[,-1])
 # Full data
 qualtrics_prolific <- cbind(prolific_misc, prolific_rq[,-1], prolific_rqTime[,-1], 
-                            prolific_rqDebrief[,-1], prolific_nfc[,-1], prolific_nfcTime[,-1],
-                            prolific_bnt[,-1], prolific_bntTime[,-1], prolific_fdc[,-1], 
-                            prolific_fdcTime[,-1])
+                            prolific_rqDebrief[,-1], prolific_rqNTLX[,-1], prolific_nfc[,-1], 
+                            prolific_nfcTime[,-1], prolific_bnt[,-1], prolific_bntTime[,-1], 
+                            prolific_fdc[,-1], prolific_fdcTime[,-1])
 
 # Write to CSV
 write.csv(qualtrics_prolific, "data/processed/qualtrics_prolific.csv")
