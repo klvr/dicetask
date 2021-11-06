@@ -475,7 +475,16 @@ colnames(students_diceDiff) <- c(namesMisc[1], paste("dice", namesSelfRep[8], se
 # CAPE
 ## Recode answers into 1: Never, 4: Nearly always # To match others using CAPE (so not 0 index)
 ## Create summary variables for P, N and D sub-scales, and control items
+students_capeA[,2:5] <- recodeCAPE(students_capeA[2:46])
+students_capeB[,2:5] <- recodeCAPE(students_capeB[2:46])
+## Remove leftover CAPE items
+students_capeA <- students_capeA[,1:5]
+students_capeB <- students_capeB[,1:5]
+## Variable names
+colnames(students_capeA) <- c(namesMisc[1], namesSelfRep[2:5])
+colnames(students_capeB) <- c(namesMisc[1], namesSelfRep[2:5])
 
+# CAPE times
 
 # 06 Summary variable creation Prolific ------------------------------------------------------------
 
