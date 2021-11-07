@@ -23,8 +23,8 @@ qualtrics_students_3 <- read.csv("data/temp/qualtrics_students_3.csv")
 
 # Load meta files
 
-meta_prolific <- read.csv("data/processed/meta_prolific.csv")
-meta_students <- read.csv("data/processed/meta_students.csv")
+meta_prolific <- read.csv("data/temp/meta_prolific.csv")
+meta_students <- read.csv("data/temp/meta_students.csv")
 
 # 02 Extraction Prolific ---------------------------------------------------------------------------
 
@@ -366,7 +366,7 @@ prob3 <- grepl(students_miscA[,2], pattern = "iP")
 students_miscA[,2] <- as.numeric(((prob1+prob2+prob3) > 0))
 ## Recode gender
 students_miscA[,3] <- recodeGender(students_miscA[,3])
-## Recode Fish/condtion catch
+## Recode Fish/condition catch
 students_miscB[,2] <- recodeSingle(students_miscB[,2], c = "Yes") #1: Played before, 0: Not
 ## Variable names
 colnames(students_miscA) <- namesMisc
@@ -607,6 +607,48 @@ prolific_bntTime <- cbind(prolific_bntTime, bntTimeOTOverall, bntTimeFLOverall, 
                           bntTimeCMOverall)
 
 # 07 Summary variable creation Students ------------------------------------------------------------
+
+# Summary variables
+## RQ
+rqScoreA <- rowSums(students_rqA[,-1]==1) # Overall score
+rqScoreB <- rowSums(students_rqB[,-1]==1) # Overall score
+students_rqA <- cbind(students_rqA, rqScoreA)
+students_rqB <- cbind(students_rqB, rqScoreB)
+## RQ times
+allitems <- seq(2,10,4) # First time variable for each item
+for (i in 2:ncol(students_rqTimeA)) {students_rqTimeA[,i] <- as.numeric(students_rqTimeA[,i])}
+for (i in 2:ncol(students_rqTimeB)) {students_rqTimeB[,i] <- as.numeric(students_rqTimeB[,i])}
+rqTimeOTOverallA <- rowSums(students_rqTimeA[,allitems])
+rqTimeFLOverallA <- rowSums(students_rqTimeA[,allitems+1])
+rqTimeLSOverallA <- rowSums(students_rqTimeA[,allitems+2])
+rqTimeCMOverallA <- rowSums(students_rqTimeA[,allitems+3])
+rqTimeOTOverallB <- rowSums(students_rqTimeB[,allitems])
+rqTimeFLOverallB <- rowSums(students_rqTimeB[,allitems+1])
+rqTimeLSOverallB <- rowSums(students_rqTimeB[,allitems+2])
+rqTimeCMOverallB <- rowSums(students_rqTimeB[,allitems+3])
+students_rqTimeA <- cbind(students_rqTimeA, rqTimeOTOverallA, rqTimeFLOverallA, rqTimeLSOverallA,
+                          rqTimeCMOverallA)
+students_rqTimeB <- cbind(students_rqTimeB, rqTimeOTOverallB, rqTimeFLOverallB, rqTimeLSOverallB,
+                          rqTimeCMOverallB)
+## CAPE times
+allitems <- seq(2,10,4) # First time variable for each item
+for (i in 2:ncol(students_capeTimeA)) {students_capeTimeA[,i] <- as.numeric(students_capeTimeA[,i])}
+for (i in 2:ncol(students_capeTimeB)) {students_capeTimeB[,i] <- as.numeric(students_capeTimeB[,i])}
+capeTimeOTOverallA <- rowSums(students_capeTimeA[,allitems])
+capeTimeFLOverallA <- rowSums(students_capeTimeA[,allitems+1])
+capeTimeLSOverallA <- rowSums(students_capeTimeA[,allitems+2])
+capeTimeCMOverallA <- rowSums(students_capeTimeA[,allitems+3])
+capeTimeOTOverallB <- rowSums(students_capeTimeB[,allitems])
+capeTimeFLOverallB <- rowSums(students_capeTimeB[,allitems+1])
+capeTimeLSOverallB <- rowSums(students_capeTimeB[,allitems+2])
+capeTimeCMOverallB <- rowSums(students_capeTimeB[,allitems+3])
+students_capeTimeA <- cbind(students_capeTimeA, capeTimeOTOverallA, capeTimeFLOverallA, 
+                            capeTimeLSOverallA, capeTimeCMOverallA)
+students_capeTimeB <- cbind(students_capeTimeB, capeTimeOTOverallB, capeTimeFLOverallB, 
+                            capeTimeLSOverallB, capeTimeCMOverallB)
+## Beads
+### How to summarize? It's chaos
+
 # 08 Merging and output Prolific -------------------------------------------------------------------
 
 # Simplified summary file
@@ -634,3 +676,172 @@ write.csv(qualtrics_prolific, "data/processed/qualtrics_prolific.csv")
 write.csv(qualtrics_prolific_summary, "data/processed/qualtrics_prolific_summary.csv")
 
 # 09 Merging and output Students -------------------------------------------------------------------
+
+# Merging data across conditions, removing cases with all NA's
+## If by mistake played/answered multiple times, keep only first
+
+## Misc
+students_misc <- merge(students_miscA, students_miscB, all = TRUE, by = "ID")
+
+## RQ
+students_rq <- merge(students_rqA[rowSums(sapply(students_rqA, is.na))!=4,],
+                     students_rqB[rowSums(sapply(students_rqB, is.na))!=4,], all = TRUE, by = "ID")
+### Save N duplicate responses to meta file
+meta_students <- rbind(meta_students, c(sum(rowSums(sapply(students_rq, is.na))==0),
+                                        "responded twice"))
+nitems <- 4
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_rq)) {if(is.na(students_rq[x,i])){students_rq[x,i] <- 
+    students_rq[x,i+nitems]}}
+}
+students_rq <- students_rq[,1:(nitems+1)]
+
+## RQ times
+students_rqTime <- merge(students_rqTimeA[rowSums(sapply(students_rqTimeA, is.na))!=16,],
+                         students_rqTimeB[rowSums(sapply(students_rqTimeB, is.na))!=16,], 
+                         all = TRUE, by = "ID")
+nitems <- 16
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_rqTime)) {if(is.na(students_rqTime[x,i])){students_rqTime[x,i] <- 
+    students_rqTime[x,i+nitems]}}
+}
+students_rqTime <- students_rqTime[,1:(nitems+1)]
+
+## NfC
+students_nfc <- merge(students_nfcA[rowSums(sapply(students_nfcA, is.na))!=1,], 
+                      students_nfcB[rowSums(sapply(students_nfcB, is.na))!=1,], 
+                      all = TRUE, by = "ID")
+nitems <- 1
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_nfc)) {if(is.na(students_nfc[x,i])){students_nfc[x,i] <- 
+    students_nfc[x,i+nitems]}}
+}
+students_nfc <- students_nfc[,1:(nitems+1)]
+
+## NfC time
+students_nfcTime <- merge(students_nfcTimeA[rowSums(sapply(students_nfcTimeA, is.na))!=4,], 
+                          students_nfcTimeB[rowSums(sapply(students_nfcTimeB, is.na))!=4,], 
+                          all = TRUE, by = "ID")
+nitems <- 4
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_nfcTime)) {if(is.na(students_nfcTime[x,i])){students_nfcTime[x,i] <- 
+    students_nfcTime[x,i+nitems]}}
+}
+students_nfcTime <- students_nfcTime[,1:(nitems+1)]
+
+## Beads NTLX
+students_beadsNTLX <- merge(students_beadsNTLXA[rowSums(sapply(students_beadsNTLXA, is.na))!=6,], 
+                            students_beadsNTLXB[rowSums(sapply(students_beadsNTLXB, is.na))!=6,], 
+                            all = TRUE, by = "ID")
+nitems <- 6
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_beadsNTLX)) {if(is.na(students_beadsNTLX[x,i])){
+    students_beadsNTLX[x,i] <- students_beadsNTLX[x,i+nitems]}}
+}
+students_beadsNTLX <- students_beadsNTLX[,1:(nitems+1)]
+
+## Beads Diff
+students_beadsDiff <- merge(students_beadsDiffA[rowSums(sapply(students_beadsDiffA, is.na))!=1,], 
+                            students_beadsDiffB[rowSums(sapply(students_beadsDiffB, is.na))!=1,], 
+                            all = TRUE, by = "ID")
+nitems <- 1
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_beadsDiff)) {if(is.na(students_beadsDiff[x,i])){
+    students_beadsDiff[x,i] <- students_beadsDiff[x,i+nitems]}}
+}
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_beadsDiff)) {if(students_beadsDiff[x,i]=="")try({
+    students_beadsDiff[x,i] <- students_beadsDiff[x,i+nitems]})}
+}
+students_beadsDiff <- students_beadsDiff[,1:(nitems+1)]
+
+## CAPE
+students_cape <- merge(students_capeA[rowSums(sapply(students_capeA, is.na))!=4,], 
+                       students_capeB[rowSums(sapply(students_capeB, is.na))!=4,], 
+                       all = TRUE, by = "ID")
+nitems <- 4
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_cape)) {if(is.na(students_cape[x,i])){students_cape[x,i] <- 
+    students_cape[x,i+nitems]}}
+}
+students_cape <- students_cape[,1:(nitems+1)]
+
+## CAPE times
+students_capeTime <- merge(students_capeTimeA[rowSums(sapply(students_capeTimeA, is.na))!=16,], 
+                           students_capeTimeB[rowSums(sapply(students_capeTimeB, is.na))!=16,], 
+                           all = TRUE, by = "ID")
+nitems <- 16
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_capeTime)) {if(is.na(students_capeTime[x,i])){students_capeTime[x,i] <- 
+    students_capeTime[x,i+nitems]}}
+}
+students_capeTime <- students_capeTime[,1:(nitems+1)]
+
+## Beads A
+students_beadsA <- merge(students_beadsAA[rowSums(sapply(students_beadsAA, is.na))!=30,], 
+                         students_beadsBA[rowSums(sapply(students_beadsBA, is.na))!=30,], 
+                         all = TRUE, by = "ID")
+nitems <- 30
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_beadsA)) {if(is.na(students_beadsA[x,i])){students_beadsA[x,i] <- 
+    students_beadsA[x,i+nitems]}}
+}
+students_beadsA <- students_beadsA[,1:(nitems+1)]
+
+## Beads B
+students_beadsB <- merge(students_beadsAB[rowSums(sapply(students_beadsAB, is.na))!=40,], 
+                         students_beadsBB[rowSums(sapply(students_beadsBB, is.na))!=40,], 
+                         all = TRUE, by = "ID")
+nitems <- 40
+for(i in 2:(nitems+1)){
+  for (x in 1:nrow(students_beadsB)) {if(is.na(students_beadsB[x,i])){students_beadsB[x,i] <- 
+    students_beadsB[x,i+nitems]}}
+}
+students_beadsB <- students_beadsB[,1:(nitems+1)]
+
+# Manual duplication inspection
+## using df[sort(c(as.numeric(row.names(df[duplicated(df[,1]),])), 
+##          as.numeric(row.names(df[duplicated(df[,1]),]))-1)),]
+## I.e., returns dataframes with all duplicated results, and inspected prior to removal so no
+## data gets lost
+students_misc <- students_misc[-c(69,136,186,222,226),]
+students_rq <- students_rq[-112,]
+students_rqTime <- students_rqTime[-112,]
+students_nfc <- students_nfc[-112,]
+students_nfcTime <- students_nfcTime[-112,]
+students_risk <- students_risk[-c(146,179,193),]
+students_mood <- students_mood[-c(146,179,193),]
+students_beadsNTLX <- students_beadsNTLX[-113,]
+students_beadsDiff <- students_beadsDiff[-c(70,137,187,223,225),]
+students_diceNTLX <- students_diceNTLX[-c(27,50),]
+students_diceDiff <- students_diceDiff[-c(27,50),]
+students_cape <- students_cape[-112,]
+students_capeTime <- students_capeTime[-112,]
+students_beadsA <- students_beadsA[-c(69,136,187,223,225),]
+students_beadsB <- students_beadsB[-c(69,137,187,223,225),]
+
+
+# Merging data across tasks
+## Full data
+qualtrics_students <-merge(students_misc, students_rq, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_rqTime, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_nfc, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_nfcTime, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_risk, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_mood, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_beadsNTLX, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_beadsDiff, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_diceNTLX, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_diceDiff, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_cape, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_capeTime, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_beadsA, all = TRUE, by = "ID")
+qualtrics_students <-merge(qualtrics_students, students_beadsB, all = TRUE, by = "ID")
+## Simplified summary-file
+qualtrics_students_summary <- qualtrics_students[,c(1:5,11,24:52,65:68)]
+
+
+# Write to CSV
+write.csv(meta_students, "data/processed/meta_students.csv")
+write.csv(qualtrics_students, "data/processed/qualtrics_students.csv")
+write.csv(qualtrics_students_summary, "data/processed/qualtrics_students_summary.csv")
