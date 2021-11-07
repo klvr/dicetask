@@ -355,8 +355,8 @@ namesRQ <- c("rqKnight","rqProbMatch","rqHospital")
 namesNTLX <- c("ntlxMental","ntlxPhysical","ntlxTempo","ntlxFrust","ntlxEffort","ntlxPerf")
 namesSelfRep <- c("nfcScore", "capeP", "capeN", "capeD", "capeC", "mood", "risk", "Diff")
 namesMisc <- c("ID","Browser","Gender", "Age", "Lang")
-namesBeadsA <- c("ProbMin", "ProbMaj", "Choice")
-namesBeadsB <- c("Choice", "ProbMin", "ProbMaj", "Choice")
+namesBeadsA <- c("beadsProbMin", "beadsProbMaj", "beadsChoice")
+namesBeadsB <- c("beadsGuess", "beadsProbMin", "beadsProbMaj", "beadsChoice")
 
 # Misc
 ## Recode Browser into 1: Problematic for Dice (Safari, Edge, mobile device), 0: No problem
@@ -485,6 +485,85 @@ colnames(students_capeA) <- c(namesMisc[1], namesSelfRep[2:5])
 colnames(students_capeB) <- c(namesMisc[1], namesSelfRep[2:5])
 
 # CAPE times
+timingAll <- NULL
+for (i in seq(2,10,4)) {
+  timingItem <- recodeTime(students_capeTimeA[i:(i+3)])
+  timingAll <- cbind(timingAll, timingItem)
+}
+students_capeTimeA <- as.data.frame(cbind(students_capeTimeA[,1], timingAll))
+timingAll <- NULL
+for (i in seq(2,10,4)) {
+  timingItem <- recodeTime(students_capeTimeB[i:(i+3)])
+  timingAll <- cbind(timingAll, timingItem)
+}
+students_capeTimeB <- as.data.frame(cbind(students_capeTimeB[,1], timingAll))
+## Variable names
+colnames(students_capeTimeA) <- c(namesMisc[1], paste(rep(c("capeBlock1", "capeBlock2", 
+                                "capeBlock3"), each = 4),rep(c("TimeOT", "TimeFS", "TimeLS",
+                                "TimeCM")), sep=""))
+colnames(students_capeTimeB) <- c(namesMisc[1], paste(rep(c("capeBlock1", "capeBlock2",
+                                "capeBlock3"), each = 4),rep(c("TimeOT", "TimeFS", "TimeLS",
+                                "TimeCM")), sep=""))
+
+# Beads
+## Recode into guess/choice pond B (corr): 1, guess/choice pond A (incorr): -1, and no decision: 0
+for (i in 2:ncol(students_beadsAA)){
+                                  students_beadsAA[,i] <- replace(students_beadsAA[,i], 
+                                  students_beadsAA[,i] == "Yes, I chose pond B", 1)}
+for (i in 2:ncol(students_beadsAA)){
+                                  students_beadsAA[,i] <- replace(students_beadsAA[,i], 
+                                  students_beadsAA[,i] == "Yes, I chose pond A", -1)}
+for (i in 2:ncol(students_beadsAA)){
+                                  students_beadsAA[,i] <- replace(students_beadsAA[,i], 
+                                  students_beadsAA[,i] == "No, I need to see more fish", 0)}
+for (i in 2:ncol(students_beadsBA)){
+                                  students_beadsBA[,i] <- replace(students_beadsBA[,i], 
+                                  students_beadsBA[,i] == "Yes, I chose pond B", 1)}
+for (i in 2:ncol(students_beadsBA)){
+                                  students_beadsBA[,i] <- replace(students_beadsBA[,i], 
+                                  students_beadsBA[,i] == "Yes, I chose pond A", -1)}
+for (i in 2:ncol(students_beadsBA)){
+                                  students_beadsBA[,i] <- replace(students_beadsBA[,i], 
+                                  students_beadsBA[,i] == "No, I need to see more fish", 0)}
+for (i in 2:ncol(students_beadsAB)){
+                                  students_beadsAB[,i] <- replace(students_beadsAB[,i], 
+                                  students_beadsAB[,i] == "Yes, I chose pond B", 1)}
+for (i in 2:ncol(students_beadsAB)){
+                                  students_beadsAB[,i] <- replace(students_beadsAB[,i], 
+                                  students_beadsAB[,i] == "Yes, I chose pond A", -1)}
+for (i in 2:ncol(students_beadsAB)){
+                                  students_beadsAB[,i] <- replace(students_beadsAB[,i], 
+                                  students_beadsAB[,i] == "No, I need to see more fish", 0)}
+for (i in 2:ncol(students_beadsAB)){
+                                  students_beadsAB[,i] <- replace(students_beadsAB[,i], 
+                                  students_beadsAB[,i] == "Pond B (80 grey : 20 green)", 1)}
+for (i in 2:ncol(students_beadsAB)){
+                                  students_beadsAB[,i] <- replace(students_beadsAB[,i], 
+                                  students_beadsAB[,i] == "Pond A (80 green : 20 grey)", -1)}
+for (i in 2:ncol(students_beadsBB)){
+                                  students_beadsBB[,i] <- replace(students_beadsBB[,i], 
+                                  students_beadsBB[,i] == "Yes, I chose pond B", 1)}
+for (i in 2:ncol(students_beadsBB)){
+                                  students_beadsBB[,i] <- replace(students_beadsBB[,i], 
+                                  students_beadsBB[,i] == "Yes, I chose pond A", -1)}
+for (i in 2:ncol(students_beadsBB)){
+                                  students_beadsBB[,i] <- replace(students_beadsBB[,i], 
+                                  students_beadsBB[,i] == "No, I need to see more fish", 0)}
+for (i in 2:ncol(students_beadsBB)){
+                                  students_beadsBB[,i] <- replace(students_beadsBB[,i], 
+                                  students_beadsBB[,i] == "Pond B (80 grey : 20 green)", 1)}
+for (i in 2:ncol(students_beadsBB)){
+                                  students_beadsBB[,i] <- replace(students_beadsBB[,i], 
+                                  students_beadsBB[,i] == "Pond A (80 green : 20 grey)", -1)}
+## Variable names
+colnames(students_beadsAA) <- c(namesMisc[1], paste(rep(namesBeadsA, times = 10),
+                                                    rep(1:10, each = 3), sep="")) 
+colnames(students_beadsBA) <- c(namesMisc[1], paste(rep(namesBeadsA, times = 10),
+                                                    rep(1:10, each = 3), sep=""))
+colnames(students_beadsAB) <- c(namesMisc[1], paste(rep(namesBeadsB, times = 10),
+                                                    rep(1:10, each = 4), sep=""))
+colnames(students_beadsBB) <- c(namesMisc[1], paste(rep(namesBeadsB, times = 10),
+                                                    rep(1:10, each = 4), sep=""))
 
 # 06 Summary variable creation Prolific ------------------------------------------------------------
 
