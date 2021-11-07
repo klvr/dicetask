@@ -102,3 +102,5 @@ write.csv(qualtrics_students_3, file = "data/temp/qualtrics_students_3.csv", row
 # Saving meta files
 write.csv(metaProlific, file = "data/processed/meta_prolific.csv", row.names = FALSE)
 write.csv(metaStudents, file = "data/processed/meta_students.csv", row.names = FALSE)
+write.csv(metaProlific, file = "data/temp/meta_prolific.csv", row.names = FALSE)
+write.csv(metaStudents, file = "data/temp/meta_students.csv", row.names = FALSE)
