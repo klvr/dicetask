@@ -799,26 +799,285 @@ for(i in 2:(nitems+1)){
 }
 students_beadsB <- students_beadsB[,1:(nitems+1)]
 
-# Manual duplication inspection
-## using df[sort(c(as.numeric(row.names(df[duplicated(df[,1]),])), 
-##          as.numeric(row.names(df[duplicated(df[,1]),]))-1)),]
-## I.e., returns dataframes with all duplicated results, and inspected prior to removal so no
-## data gets lost
-students_misc <- students_misc[-c(69,136,186,222,226),]
-students_rq <- students_rq[-112,]
-students_rqTime <- students_rqTime[-112,]
-students_nfc <- students_nfc[-112,]
-students_nfcTime <- students_nfcTime[-112,]
-students_risk <- students_risk[-c(146,179,193),]
-students_mood <- students_mood[-c(146,179,193),]
-students_beadsNTLX <- students_beadsNTLX[-113,]
-students_beadsDiff <- students_beadsDiff[-c(70,137,187,223,225),]
-students_diceNTLX <- students_diceNTLX[-c(27,50),]
-students_diceDiff <- students_diceDiff[-c(27,50),]
-students_cape <- students_cape[-112,]
-students_capeTime <- students_capeTime[-112,]
-students_beadsA <- students_beadsA[-c(69,136,187,223,225),]
-students_beadsB <- students_beadsB[-c(69,137,187,223,225),]
+# Remove duplicate attempts data
+## (dependent on duplicate.detective.R being ran beforehand)
+if (exists('students_misc_remove')) { # Duplicates removed if the removal columns exist
+## Mood
+allRemove <- NULL
+for (i in students_mood_remove) {
+  idRemove <- (grepl(i, students_mood$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_mood <- students_mood[!as.logical(allRemove),]
+## Misc
+allRemove <- NULL
+for (i in students_misc_remove) {
+  idRemove <- (grepl(i, students_misc$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_misc <- students_misc[!as.logical(allRemove),]
+## Risk
+allRemove <- NULL
+for (i in students_risk_remove) {
+  idRemove <- (grepl(i, students_risk$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_risk <- students_risk[!as.logical(allRemove),]
+## DiceNTLX
+allRemove <- NULL
+for (i in students_diceNTLX_remove) {
+  idRemove <- (grepl(i, students_diceNTLX$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_diceNTLX <- students_diceNTLX[!as.logical(allRemove),]
+## DiceDiff
+allRemove <- NULL
+for (i in students_diceDiff_remove) {
+  idRemove <- (grepl(i, students_diceDiff$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_diceDiff <- students_diceDiff[!as.logical(allRemove),]
+## RQ
+allRemove <- NULL
+for (i in students_rq_remove) {
+  idRemove <- (grepl(i, students_rq$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_rq <- students_rq[!as.logical(allRemove),]
+## RQ time
+allRemove <- NULL
+for (i in students_rqTime_remove) {
+  idRemove <- (grepl(i, students_rqTime$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_rqTime <- students_rqTime[!as.logical(allRemove),]
+## NfC
+allRemove <- NULL
+for (i in students_nfc_remove) {
+  idRemove <- (grepl(i, students_nfc$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_nfc <- students_nfc[!as.logical(allRemove),]
+## NfC time
+allRemove <- NULL
+for (i in students_nfcTime_remove) {
+  idRemove <- (grepl(i, students_nfcTime$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_nfcTime <- students_nfcTime[!as.logical(allRemove),]
+## Beads NTLX
+allRemove <- NULL
+for (i in students_beadsNTLX_remove) {
+  idRemove <- (grepl(i, students_beadsNTLX$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_beadsNTLX <- students_beadsNTLX[!as.logical(allRemove),]
+## Beads Diff
+allRemove <- NULL
+for (i in students_beadsDiff_remove) {
+  idRemove <- (grepl(i, students_beadsDiff$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_beadsDiff <- students_beadsDiff[!as.logical(allRemove),]
+## CAPE
+allRemove <- NULL
+for (i in students_cape_remove) {
+  idRemove <- (grepl(i, students_cape$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_cape <- students_cape[!as.logical(allRemove),]
+## Beads A
+allRemove <- NULL
+for (i in students_beadsA_remove) {
+  idRemove <- (grepl(i, students_beadsA$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_beadsA <- students_beadsA[!as.logical(allRemove),]
+## Beads B
+allRemove <- NULL
+for (i in students_beadsB_remove) {
+  idRemove <- (grepl(i, students_beadsB$ID))
+  allRemove <- cbind(idRemove, allRemove)
+}
+allRemove <- rowSums(allRemove)
+students_beadsB <- students_beadsB[!as.logical(allRemove),]
+}
+
+# Renaming to correct / equal IDs for all kept data
+if (exists('students_renameID')) { # Duplicates removed if the rename columns exist
+## Mood
+df <- students_mood
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+    }
+}
+students_mood <- df
+## Misc
+df <- students_misc
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_misc <- df
+## Risk
+df <- students_risk
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_risk <- df
+## Dice NTLX
+df <- students_diceNTLX
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_diceNTLX <- df
+## Dice Diff
+df <- students_diceDiff
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_diceDiff <- df
+## RQ
+df <- students_rq
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_rq <- df
+## RQ time
+df <- students_rqTime
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_rqTime <- df
+## NfC
+df <- students_nfc
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_nfc <- df
+## NfC time
+df <- students_nfcTime
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_nfcTime <- df
+## Beads NTLX
+df <- students_beadsNTLX
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_beadsNTLX <- df
+## Beads Diff
+df <- students_beadsDiff
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_beadsDiff <- df
+## CAPE
+df <- students_cape
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_cape <- df
+## Beads A
+df <- students_beadsA
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_beadsA <- df
+## Beads B
+df <- students_beadsB
+for (i in 1:length(students_renameID[,2])) {
+  for (x in 1:length(df$ID)) {
+    if (df[x,1]==students_renameID[i,2]) df[x,1] <- students_renameID[i,1] 
+  }
+}
+students_beadsB <- df
+}
+## Manual removal of ID 66118 & 98851 second attempt, and all 99999 entries (pilot data)
+students_misc <-      rbind(students_misc[students_misc$ID!=66118,], 
+                            students_misc[students_misc$ID==66118,][-2,])
+students_rq <-        rbind(students_rq[students_rq$ID!=66118,], 
+                            students_rq[students_rq$ID==66118,][-2,])
+students_rqTime <-    rbind(students_rqTime[students_rqTime$ID!=66118,], 
+                            students_rqTime[students_rqTime$ID==66118,][-2,])
+students_nfc <-       rbind(students_nfc[students_nfc$ID!=66118,], 
+                            students_nfc[students_nfc$ID==66118,][-2,])
+students_nfcTime <-   rbind(students_nfcTime[students_nfcTime$ID!=66118,], 
+                            students_nfcTime[students_nfcTime$ID==66118,][-2,])
+students_risk <-      rbind(students_risk[students_risk$ID!=66118,], 
+                            students_risk[students_risk$ID==66118,][-2,])
+students_mood <-      rbind(students_mood[students_mood$ID!=66118,], 
+                            students_mood[students_mood$ID==66118,][-2,])
+students_beadsNTLX <- rbind(students_beadsNTLX[students_beadsNTLX$ID!=66118,], 
+                            students_beadsNTLX[students_beadsNTLX$ID==66118,][-2,])
+students_beadsDiff <- rbind(students_beadsDiff[students_beadsDiff$ID!=66118,], 
+                            students_beadsDiff[students_beadsDiff$ID==66118,][-2,])
+students_diceNTLX <-  rbind(students_diceNTLX[students_diceNTLX$ID!=66118,], 
+                            students_diceNTLX[students_diceNTLX$ID==66118,][-2,])
+students_diceDiff <-  rbind(students_diceDiff[students_diceDiff$ID!=66118,], 
+                            students_diceDiff[students_diceDiff$ID==66118,][-2,])
+students_cape <-      rbind(students_cape[students_cape$ID!=66118,], 
+                            students_cape[students_cape$ID==66118,][-2,])
+students_beadsA <-    rbind(students_beadsA[students_beadsA$ID!=66118,], 
+                            students_beadsA[students_beadsA$ID==66118,][-2,])
+students_beadsB <-    rbind(students_beadsB[students_beadsB$ID!=66118,], 
+                            students_beadsB[students_beadsB$ID==66118,][-2,])
+students_misc <-      rbind(students_misc[students_misc$ID!=98851,], 
+                            students_misc[students_misc$ID==98851,][-2,])
+students_beadsDiff <- rbind(students_beadsDiff[students_beadsDiff$ID!=98851,], 
+                            students_beadsDiff[students_beadsDiff$ID==98851,][-2,])
+students_diceNTLX <-  rbind(students_diceNTLX[students_diceNTLX$ID!=98851,], 
+                            students_diceNTLX[students_diceNTLX$ID==98851,][-2,])
+students_diceDiff <-  rbind(students_diceDiff[students_diceDiff$ID!=98851,], 
+                            students_diceDiff[students_diceDiff$ID==98851,][-2,])
+students_beadsA <-    rbind(students_beadsA[students_beadsA$ID!=98851,], 
+                            students_beadsA[students_beadsA$ID==98851,][-2,])
+students_beadsB <-    rbind(students_beadsB[students_beadsB$ID!=98851,], 
+                            students_beadsB[students_beadsB$ID==98851,][-2,])
+students_misc <-      students_misc[students_misc$ID!=99999,]
+students_beadsDiff <- students_beadsDiff[students_beadsDiff$ID!=99999,]
+students_diceNTLX <-  students_diceNTLX[students_diceNTLX$ID!=99999,]
+students_diceDiff <-  students_diceDiff[students_diceDiff$ID!=99999,]
+students_beadsA <-    students_beadsA[students_beadsA$ID!=99999,]
+students_beadsB <-    students_beadsB[students_beadsB$ID!=99999,]
 
 
 # Merging data across tasks
