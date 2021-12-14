@@ -647,7 +647,7 @@ students_capeTimeA <- cbind(students_capeTimeA, capeTimeOTOverallA, capeTimeFLOv
 students_capeTimeB <- cbind(students_capeTimeB, capeTimeOTOverallB, capeTimeFLOverallB, 
                             capeTimeLSOverallB, capeTimeCMOverallB)
 ## Beads
-### How to summarize? It's chaos
+### Beads summary variables created after AA, AB, BA and BB merging are done (section 09, line 802)
 
 # 08 Merging and output Prolific -------------------------------------------------------------------
 
@@ -778,8 +778,8 @@ for(i in 2:(nitems+1)){
 students_capeTime <- students_capeTime[,1:(nitems+1)]
 
 ## Beads A
-students_beadsA <- merge(students_beadsAA[rowSums(sapply(students_beadsAA, is.na))!=30,], 
-                         students_beadsBA[rowSums(sapply(students_beadsBA, is.na))!=30,], 
+students_beadsA <- merge(students_beadsAA[rowSums(sapply(students_beadsAA, is.na))<11,], 
+                         students_beadsBA[rowSums(sapply(students_beadsBA, is.na))<11,], 
                          all = TRUE, by = "ID")
 nitems <- 30
 for(i in 2:(nitems+1)){
@@ -789,8 +789,8 @@ for(i in 2:(nitems+1)){
 students_beadsA <- students_beadsA[,1:(nitems+1)]
 
 ## Beads B
-students_beadsB <- merge(students_beadsAB[rowSums(sapply(students_beadsAB, is.na))!=40,], 
-                         students_beadsBB[rowSums(sapply(students_beadsBB, is.na))!=40,], 
+students_beadsB <- merge(students_beadsAB[rowSums(sapply(students_beadsAB, is.na))<11,], 
+                         students_beadsBB[rowSums(sapply(students_beadsBB, is.na))<11,], 
                          all = TRUE, by = "ID")
 nitems <- 40
 for(i in 2:(nitems+1)){
@@ -798,6 +798,91 @@ for(i in 2:(nitems+1)){
     students_beadsB[x,i+nitems]}}
 }
 students_beadsB <- students_beadsB[,1:(nitems+1)]
+
+## Beads summary variable creation
+### Creates three variables, DtD (Draw to Decision; first choice), EPD (Estimated Probability at
+### Decision), CAD (Change after Decision; choosing something else after first decision; yes/no)
+### Beads A
+### DtD
+seqv <- seq(4,31,3)
+students_beadsA$beadsDtD <- 1
+for (x in 1:nrow(students_beadsA)) {
+  firstdtd <- NULL
+  for (i in seqv) {
+    if (as.numeric(students_beadsA[x,i])!=0) {
+      firstdtd <- c(firstdtd, which(seqv==i))
+      students_beadsA[x,32] <- min(firstdtd) 
+    }
+  }
+}
+#### EPD
+students_beadsA$beadsEPD <- 1
+for (x in 1:nrow(students_beadsA)) {
+  if ((students_beadsA[x,seqv[students_beadsA[x,32]]]) == 1) {students_beadsA[x,33] <- students_beadsA[x,seqv[students_beadsA[x,32]]-1]}
+  if ((students_beadsA[x,seqv[students_beadsA[x,32]]]) == -1) {students_beadsA[x,33] <- students_beadsA[x,seqv[students_beadsA[x,32]]-2]}
+}
+
+#### CAD
+students_beadsA$beadsCAD <- 1
+for (x in 1:nrow(students_beadsA)) {
+  changes <- NULL
+  for (i in seqv[students_beadsA[x,32]:length(seqv)]) {
+    changes <- c(changes, students_beadsA[x,i])
+  }
+  students_beadsA[x,34] <- length(unique(changes))>1
+}
+#### Set never made any choice to NA
+for (x in 1:nrow(students_beadsA)) {
+  if ((students_beadsA[x,seqv[students_beadsA[x,32]]]) == 0) {
+    students_beadsA[x,33] <- NA
+    students_beadsA[x,34] <- NA
+    students_beadsA[x,32] <- NA}
+}
+#### Set condition variable (beadsCond; A:0, B:1)
+students_beadsA$beadsCond <- 0
+#### Keep summary variables only
+students_beadsA <- students_beadsA[,c(1,32,33,34,35)]
+
+### Beads B
+#### DtD
+seqv <- seq(5,41,4)
+students_beadsB$beadsDtD <- 1
+for (x in 1:nrow(students_beadsB)) {
+  firstdtd <- NULL
+  for (i in seqv) {
+    if (as.numeric(students_beadsB[x,i])!=0) {
+      firstdtd <- c(firstdtd, which(seqv==i))
+      students_beadsB[x,42] <- min(firstdtd) 
+    }
+  }
+}
+#### EPD
+students_beadsB$beadsEPD <- 1
+for (x in 1:nrow(students_beadsB)) {
+  if ((students_beadsB[x,seqv[students_beadsB[x,42]]]) == 1) {students_beadsB[x,43] <- students_beadsB[x,seqv[students_beadsB[x,42]]-1]}
+  if ((students_beadsB[x,seqv[students_beadsB[x,42]]]) == -1) {students_beadsB[x,43] <- students_beadsB[x,seqv[students_beadsB[x,42]]-2]}
+}
+
+#### CAD
+students_beadsB$beadsCAD <- 1
+for (x in 1:nrow(students_beadsB)) {
+  changes <- NULL
+  for (i in seqv[students_beadsB[x,42]:length(seqv)]) {
+    changes <- c(changes, students_beadsB[x,i])
+  }
+  students_beadsB[x,44] <- length(unique(changes))>1
+}
+#### Set never made any choice to NA
+for (x in 1:nrow(students_beadsB)) {
+  if ((students_beadsB[x,seqv[students_beadsB[x,42]]]) == 0) {
+    students_beadsB[x,43] <- NA
+    students_beadsB[x,44] <- NA
+    students_beadsB[x,42] <- NA}
+}
+#### Set condition variable (beadsCond; A:0, B:1)
+students_beadsB$beadsCond <- 1
+#### Keep summary variables only
+students_beadsB <- students_beadsB[,c(1,42,43,44,45)]
 
 # Remove duplicate attempts data
 ## (dependent on duplicate.detective.R being ran beforehand)
@@ -1081,7 +1166,6 @@ students_beadsB <-    students_beadsB[students_beadsB$ID!=99999,]
 
 
 # Merging data across tasks
-## Full data
 qualtrics_students <-merge(students_misc, students_rq, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_rqTime, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_nfc, all = TRUE, by = "ID")
@@ -1093,14 +1177,20 @@ qualtrics_students <-merge(qualtrics_students, students_beadsDiff, all = TRUE, b
 qualtrics_students <-merge(qualtrics_students, students_diceNTLX, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_diceDiff, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_cape, all = TRUE, by = "ID")
-qualtrics_students <-merge(qualtrics_students, students_capeTime, all = TRUE, by = "ID")
+#qualtrics_students <-merge(qualtrics_students, students_capeTime, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_beadsA, all = TRUE, by = "ID")
 qualtrics_students <-merge(qualtrics_students, students_beadsB, all = TRUE, by = "ID")
-## Simplified summary-file
-qualtrics_students_summary <- qualtrics_students[,c(1:5,11,24:52,65:68)]
+## If beads condition is A, only keep that, if B, only keep that
+for (i in 1:nrow(qualtrics_students)) {
+  if (!is.na(as.numeric(qualtrics_students[i,60]))) {
+    qualtrics_students[i,56] <- qualtrics_students[i,60]
+    qualtrics_students[i,55] <- qualtrics_students[i,59]
+    qualtrics_students[i,54] <- qualtrics_students[i,58]
+    qualtrics_students[i,53] <- qualtrics_students[i,57]}
+}
+qualtrics_students <- qualtrics_students[,-c(57,58,59,60)]
 
 
 # Write to CSV
 write.csv(meta_students, "data/processed/meta_students.csv")
 write.csv(qualtrics_students, "data/processed/qualtrics_students.csv")
-write.csv(qualtrics_students_summary, "data/processed/qualtrics_students_summary.csv")
