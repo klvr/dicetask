@@ -5,6 +5,9 @@
 # Presentations
 /presentations/
 
+# Task-files (only uploaded to OSF)
+/tasks/
+
 # History files
 .Rhistory
 .Rapp.history
