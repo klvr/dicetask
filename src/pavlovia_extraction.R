@@ -1,7 +1,8 @@
 ####################################################################################################
-# Extracts and collects data from BoxTask / Pavlovia                                               #
+# Extracts, collects and summarises data from BoxTask / Pavlovia                                   #
 # Input: Pavlovia raw data (only uses the log.gz-files)                                            #
-# Output: Cleaned csv-file in 'temp' containing raw DtD and choices, to be summarised              #
+# Output: Two CSV-files, raw DtD and choices in 'temp', and summary/recoded scores in 'processed'  #
+# Meta-output: Outputs a meta-file on relevant data removed (e.g., due to multiple attempts)       #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 
@@ -10,8 +11,14 @@
 # Clean up workspare
 rm(list = ls())
 
+# Source own functions
+for (i in list.files("src/functions", full.names = TRUE)) {source(i)}
+
 # Set up file for capture of data
 boxTask <- NULL
+
+# Set up meta file to capture data removal
+metaBoxTask <- NULL
 
 # 01 Load raw data ---------------------------------------------------------------------------------
 
@@ -173,6 +180,179 @@ boxTask <- as.data.frame(boxTask)
 colnames(boxTask) <- c("ID", "DtD1", "DtD2", "DtD3", "DtD4",
                        "Choice1", "Choice2", "Choice3", "Choice4")
 
-# 04 Save cleaned CSV-file -------------------------------------------------------------------------
+# 04 Output CSV-files for raw DtD and choices in 'temp' --------------------------------------------
 
 write.csv(boxTask, "data/temp/pavlovia_students_2.csv")
+
+# 05 Clean-up  -------------------------------------------------------------------------------------
+
+# Record multiple attempts prior to removal
+metaMultiAttempt <- c(sum(duplicated(boxTask[,1])), "Multiple attempts")
+metaUniqeMultiAttempt <- c(length(unique(boxTask[duplicated(boxTask[,1]),1])),
+                           "Participants with multiple attempts")
+metaBoxTask <- rbind(metaMultiAttempt, metaUniqeMultiAttempt)
+colnames(metaBoxTask) <- c("N", "Reason")
+
+# Flagging of multiple attempts and only keep first (time-wise) attempt
+boxTask$multipleAttempt <- as.numeric(duplicated(boxTask[,1]))
+for (i in 1:length(boxTask$multipleAttempt)) { #Will throw error as the length decreases, disregard
+  if (boxTask[i,10] == 1) {
+    boxTask[i-1,10] <- 9
+    boxTask <- boxTask[-i,]
+    }
+}
+boxTask <- boxTask[!(boxTask$multipleAttempt==1),]
+for (i in 1:length(boxTask$multipleAttempt)) {
+  if (boxTask[i,10] == 9) {
+    boxTask[i,10] <- 1
+    }
+}
+
+# Set IDs as row names
+row.names(boxTask) <- boxTask[,1]
+boxTask <- boxTask[,-1]
+
+# Recode choices into 1: correct, 0: incorrect
+boxTask[,5] <- recodeSingle(boxTask[,5], c = "Keydown: j")
+boxTask[,6] <- recodeSingle(boxTask[,6], c = "Keydown: k")
+boxTask[,7] <- recodeSingle(boxTask[,7], c = "Keydown: k")
+boxTask[,8] <- recodeSingle(boxTask[,8], c = "Keydown: j")
+
+# Change all to numeric values
+boxTask[,1] <- as.numeric(as.character(boxTask[,1]))
+boxTask[,2] <- as.numeric(as.character(boxTask[,2]))
+boxTask[,3] <- as.numeric(as.character(boxTask[,3]))
+boxTask[,4] <- as.numeric(as.character(boxTask[,4]))
+
+# 06 Ideal Observer thresholds ---------------------------------------------------------------------
+
+# Observable sequences
+seqTrial1 <- c(1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1)
+seqTrial2 <- c(0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1)
+seqTrial3 <- c(1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1)
+seqTrial4 <- c(0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0)
+## Reverse trial 2 and 3 as they had '0' as majority
+seqTrial2 <- (seqTrial2 - 1) * -1
+seqTrial3 <- (seqTrial3 - 1) * -1
+## All collected
+sequences <- c("seqTrial1","seqTrial2","seqTrial3","seqTrial4")
+
+# Calculate thresholds
+thresholdSequences <- NULL # Set-up data frame
+for (i in sequences) {
+  seq <- eval(parse(text = i)) # Read in sequences
+  probl <- 8
+  probh <- 8
+  problow <- probl - cumsum(seq)
+  probhigh <- probh - cumsum((seq*-1)+1)
+  thresholdSeq <- probhigh / (probhigh+problow)
+  thresholdSeq <- replace(thresholdSeq, thresholdSeq>1, 1)
+  thresholdSequences <- cbind(thresholdSequences, thresholdSeq)
+}
+## Set row names
+colnames(thresholdSequences) <- c("IO1","IO2","IO3","IO4")
+
+# Add in IO to main data frame
+## Add inn DtD duplicates to be replaced
+boxTask <- cbind(boxTask, boxTask[,c(1,2,3,4)]) 
+## Make zero-draws into NA for IO
+boxTask[,c(10,11,12,13)] <- replace(boxTask[,c(10,11,12,13)], boxTask[,c(10,11,12,13)] == 0, NA)
+## Replace DtD with IO in boxTask data frame
+for (i in 1:nrow(boxTask)) {
+  if (!is.na(boxTask[i,10])) {boxTask[i,10] <- thresholdSequences[boxTask[i,10],1]}
+  if (!is.na(boxTask[i,11])) {boxTask[i,11] <- thresholdSequences[boxTask[i,11],2]}
+  if (!is.na(boxTask[i,12])) {boxTask[i,12] <- thresholdSequences[boxTask[i,12],3]}
+  if (!is.na(boxTask[i,13])) {boxTask[i,13] <- thresholdSequences[boxTask[i,13],4]}
+}
+## Convert NA's back to .50-probability for IO
+boxTask[,c(10,11,12,13)] <- replace(boxTask[,c(10,11,12,13)], is.na(boxTask[,c(10,11,12,13)]), 0.5)
+
+# 07 Variable creation -----------------------------------------------------------------------------
+
+# Create 'DtD'-based exclusion criteria variables
+## Trial wise DtD =< 2
+boxTask$excludeDtD1 <- as.numeric(boxTask[,1]<3)
+boxTask$excludeDtD2 <- as.numeric(boxTask[,2]<3)
+boxTask$excludeDtD3 <- as.numeric(boxTask[,3]<3)
+boxTask$excludeDtD4 <- as.numeric(boxTask[,4]<3)
+## Overall mean trial wise exclusion (0: no trials to be excluded, 1: all trials to be excluded)
+boxTask$excludeOverall <- rowMeans(boxTask[,c(14,15,16,17)])
+
+# Create mean score variable (x2, with and without exclusion trials counted;
+#                                             0: no correct, 1: all correct)
+boxTask$overallScore <- rowMeans(boxTask[,c(5,6,7,8)], na.rm = TRUE)
+boxTask$overallScoreE <- rowMeans(
+  (replace(boxTask[,c(5,6,7,8)], boxTask[,c(14,15,16,17)] == 1, NA)), na.rm = TRUE)
+
+# Create mean DtD variable (x2, with and without exclusion trials counted)
+boxTask$overallDtD <- rowMeans(boxTask[,c(1,2,3,4)], na.rm = TRUE)
+boxTask$overallDtDE <- rowMeans(
+  (replace(boxTask[,c(1,2,3,4)], boxTask[,c(14,15,16,17)] == 1, NA)), na.rm = TRUE)
+
+# Create mean IO variable (x2, with and without exclusion trials counted)
+boxTask$overallIO <- rowMeans(boxTask[,c(10,11,12,13)], na.rm = TRUE)
+boxTask$overallIOE <- rowMeans(
+  (replace(boxTask[,c(10,11,12,13)], boxTask[,c(14,15,16,17)] == 1, NA)), na.rm = TRUE)
+
+# Create 'reached certainty' variable (x2, with and without exclusion trials counted;
+#                                           0: in no trials, 1: in all trials)
+boxTask$reachcert <- rowMeans(boxTask[,c(10,11,12,13)]==1, na.rm = TRUE)
+boxTask$reachcertE <- rowMeans(
+  (replace(boxTask[,c(10,11,12,13)], boxTask[,c(14,15,16,17)] == 1, NA))==1, na.rm = TRUE)
+
+# Create 'opened all boxes' variables (x2, with and without exclusion trials counted;
+#                                           0: in no trials, 1: in all trials)
+boxTask$allboxs <- rowMeans(boxTask[,c(1,2,3,4)]==15, na.rm = TRUE)
+boxTask$allboxsE <- rowMeans(
+  (replace(boxTask[,c(1,2,3,4)], boxTask[,c(14,15,16,17)] == 1, NA))==15, na.rm = TRUE)
+
+# Create 'went with minority colour' variable (0: in no trials, 1: in all trials; without '0'-draws)
+## Chosing minority, or majority when in observed minority (due to sequence) is counted.
+trial1min <- ((boxTask[,5] -1)*-1)
+trial1min <- replace(trial1min, boxTask[,1]==0, NA)
+trial2min <- (((boxTask[,2]==2) + (boxTask[,2]==4)) == boxTask[,6]) 
+trial2min <- replace(trial2min, boxTask[,2]==0, NA)
+trial3min <- ((boxTask[,3]<5) == boxTask[,7])
+trial3min <- replace(trial3min, boxTask[,3]==0, NA)
+trial4min <- ((boxTask[,4]<5) == boxTask[,8])
+trial4min <- replace(trial4min, boxTask[,4]==0, NA)
+boxTask$wentMin <- rowMeans(cbind(trial1min, trial2min, trial3min, trial4min), na.rm = TRUE)
+
+# Update metaFile with n incomplete data
+## '0' draws
+meta0drawtrials <- sum(boxTask[,c(1,2,3,4)]==0)
+metaUnique0drawtrials <- sum(rowSums(boxTask[,c(1,2,3,4)]==0)>0)
+## Missing response
+metaMissingResp <- sum(is.na(boxTask[,c(5,6,7,8)]))
+metaUniqueMissingResp <- sum(rowSums(is.na(boxTask[,c(5,6,7,8)])))
+## Update meta
+metaBoxTask <- rbind(metaBoxTask, c(meta0drawtrials, "Zero draw trials"), c(metaUnique0drawtrials, 
+                     "Participants with zero draw trials"), c(metaMissingResp,
+                      "Missing resp trials"), c(metaUniqueMissingResp, 
+                      "Participants with missing resp trials"))
+
+# 08 Output CSV-files for all data in 'processed' --------------------------------------------------
+
+# Fix row-names to match that of other tasks
+colnames(boxTask) <- c("boxDtD1", "boxDtD2", "boxDtD3", "boxDtD4", "boxScore1", "boxScore2",
+                       "boxScore3", "boxScore4", "boxMultiAttempt", "boxIO1", "boxIO2", "boxIO3",
+                       "boxIO4", "boxExcl1", "boxExcl2", "boxExcl3", "boxExcl4", "boxExclOverall",
+                       "boxScoreOverall", "boxScoreOverallE", "boxDtDOverall", "boxDtDOverallE",
+                       "boxIOOverall", "boxIOOverallE", "boxReachCert", "boxReachCertE",
+                       "boxAllBoxs", "boxAllBoxsE", "boxWentMin")
+row.names(metaBoxTask) <- NULL
+
+# Remove course-only participant
+metaCourse <- sum(row.names(boxTask)=="2334")
+metaBoxTask <- rbind(metaBoxTask, c(metaCourse, "Participants excluded for science"))
+boxTask <- boxTask[row.names(boxTask)!="2334",]
+
+# Create summary-file
+write.csv(boxTask[,-c(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,19,21,23,25,27)],
+          "data/processed/box-task_summary.csv")
+
+# Create full-data file
+write.csv(boxTask, "data/processed/box-task_full.csv")
+
+# Create meta file
+write.csv(metaBoxTask, "data/processed/meta_box-task.csv")
