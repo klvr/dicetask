@@ -16,7 +16,9 @@ recodeSingle <- function(x, c, h = "heuristic") {
   c <- toupper(c)
   h <- toupper(h)
   for (i in 1:length(x)) {
-    if (x[i] == c) {
+    if (is.na(x[i])) {
+      x[i] <- NA
+    } else if (x[i] == c) {
       x[i] <- 1
     } else if (x[i] == h) {
       x[i] <- -1
