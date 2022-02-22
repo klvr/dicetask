@@ -145,7 +145,6 @@ pavBox43 <- length(pavData[grep("box_43: fill", pavData[,3]),3])>0
 pavBox44 <- length(pavData[grep("box_44: fill", pavData[,3]),3])>0
 pavBoxTrial3 <- pavBox30 + pavBox31 + pavBox32 + pavBox33 + pavBox34 + pavBox35 + pavBox36 + 
                 pavBox37 + pavBox38 + pavBox39 + pavBox40 + pavBox41 + pavBox42 + pavBox43 + pavBox44
-
 ## Trial 4
 pavBox45 <- length(pavData[grep("box_45: fill", pavData[,3]),3])>0
 pavBox46 <- length(pavData[grep("box_46: fill", pavData[,3]),3])>0
@@ -182,14 +181,15 @@ colnames(boxTask) <- c("ID", "DtD1", "DtD2", "DtD3", "DtD4",
 
 # 04 Output CSV-files for raw DtD and choices in 'temp' --------------------------------------------
 
-write.csv(boxTask, "data/temp/pavlovia_students_2.csv")
+write.csv(boxTask, "data/temp/pavlovia_students_2_raw.csv")
 
-# 05 Clean-up  -------------------------------------------------------------------------------------
+# 05 Clean-up --------------------------------------------------------------------------------------
+## Flagging and removal of multiple attempts, recoding, and variable-class fix
 
 # Record multiple attempts prior to removal
-metaMultiAttempt <- c(sum(duplicated(boxTask[,1])), "Multiple attempts")
+metaMultiAttempt <- c(sum(duplicated(boxTask[,1])), "Duplicate attempts removed")
 metaUniqeMultiAttempt <- c(length(unique(boxTask[duplicated(boxTask[,1]),1])),
-                           "Participants with multiple attempts")
+                           "Participants with duplicate attempts")
 metaBoxTask <- rbind(metaMultiAttempt, metaUniqeMultiAttempt)
 colnames(metaBoxTask) <- c("N", "Reason")
 
@@ -333,26 +333,29 @@ metaBoxTask <- rbind(metaBoxTask, c(meta0drawtrials, "Zero draw trials"), c(meta
 
 # 08 Output CSV-files for all data in 'processed' --------------------------------------------------
 
-# Fix row-names to match that of other tasks
+# Fix row & col names to match that of other tasks
 colnames(boxTask) <- c("boxDtD1", "boxDtD2", "boxDtD3", "boxDtD4", "boxScore1", "boxScore2",
-                       "boxScore3", "boxScore4", "boxMultiAttempt", "boxIO1", "boxIO2", "boxIO3",
+                       "boxScore3", "boxScore4", "boxMetaMultiAttempt", "boxIO1", "boxIO2", "boxIO3",
                        "boxIO4", "boxExcl1", "boxExcl2", "boxExcl3", "boxExcl4", "boxExclOverall",
                        "boxScoreOverall", "boxScoreOverallE", "boxDtDOverall", "boxDtDOverallE",
                        "boxIOOverall", "boxIOOverallE", "boxReachCert", "boxReachCertE",
                        "boxAllBoxs", "boxAllBoxsE", "boxWentMin")
 row.names(metaBoxTask) <- NULL
+## Add in sample pool to meta
+metaBoxTask <- cbind(metaBoxTask, "Students_2")
+colnames(metaBoxTask) <- c("N affected","Reason","Sample pool")
 
-# Remove course-only participant
+# Remove course-only participant and record in meta
 metaCourse <- sum(row.names(boxTask)=="2334")
-metaBoxTask <- rbind(metaBoxTask, c(metaCourse, "Participants excluded for science"))
+metaBoxTask <- rbind(metaBoxTask, c(metaCourse, "Participants excluded for science", "Students_2"))
 boxTask <- boxTask[row.names(boxTask)!="2334",]
 
 # Create summary-file
 write.csv(boxTask[,-c(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,19,21,23,25,27)],
-          "data/processed/box-task_summary.csv")
+          "data/processed/box-task_students_summary.csv")
 
 # Create full-data file
-write.csv(boxTask, "data/processed/box-task_full.csv")
+write.csv(boxTask, "data/processed/box-task_students_full.csv")
 
 # Create meta file
 write.csv(metaBoxTask, "data/processed/meta_box-task.csv")
