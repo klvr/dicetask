@@ -3,6 +3,8 @@
 # Input: Jatos raw data                                                                            #
 # Output: Two CSV-files, raw DtD and choices in 'temp', and summary/recoded scores in 'processed'  #
 # Meta-output: Outputs a meta-file on relevant data removed (e.g., due to multiple attempts)       #
+# Note: Section 00 to (and including) 04 runs automatically on all new data. From section 03 it's  #
+#       experiment specific and must be adjusted for new experiments (not new data)                #
 # Kristoffer Klevjer - github.com/klvr - klevjer(a)gmail.com                                       #
 ####################################################################################################
 
@@ -25,7 +27,7 @@ metaDiceTask <- NULL
 jatFiles <- list.files("data/raw/jatos", pattern = "*.txt", recursive = TRUE)
 jatPath <- paste("data/raw/jatos/", jatFiles, sep ="")
 
-# 02 Extract and save cleaned raw data -------------------------------------------------------------
+# 02 Extract data per participant ------------------------------------------------------------------
 
 # Read in experiment data
 for (x in 1:length(jatPath)) {
@@ -59,10 +61,9 @@ dice7Deb <- jatPart[18,]
 dice8 <- jatPart[19,]
 dice8Deb <- jatPart[20,]
 diceTrial2End <- jatPart[21,]
-## Catching of limited throws if they were administered
-### These differ in length (nrow) based on how many dice were thrown etc.
+## Catching of limited throws if they were administered not done!
 
-# Exctracting relevant data from each row
+# Extracting relevant data from each row
 ## Meta
 diceMetaStudyID <- unlist(strsplit(diceMeta, ","))[ 
                    grep("studyId*", unlist(strsplit(diceMeta, ",")))] # Fetch row with StudyID
@@ -137,35 +138,213 @@ dice5Col <- unlist(strsplit(unlist(strsplit(dice5, ",color:"))[2],""))[1]
 dice6Col <- unlist(strsplit(unlist(strsplit(dice6, ",color:"))[2],""))[1]
 dice7Col <- unlist(strsplit(unlist(strsplit(dice7, ",color:"))[2],""))[1]
 dice8Col <- unlist(strsplit(unlist(strsplit(dice8, ",color:"))[2],""))[1]
-## Preconcived loadedness
+## Preconceived loadedness
 diceTrial1Pre <- unlist(strsplit(unlist(strsplit(diceTrial1Pre, "value:"))[2], "\\}"))[1]
 diceTrial2Pre <- unlist(strsplit(unlist(strsplit(diceTrial2Pre, "value:"))[2], "\\}"))[1]
 ## Trial end decision
 diceTrial1End <- unlist(strsplit(unlist(strsplit(diceTrial1End, "value:"))[2], "\\}"))[1]
 diceTrial2End <- unlist(strsplit(unlist(strsplit(diceTrial2End, "value:"))[2], "\\}"))[1]
+## Make a correct (1) or not (0) variable for Trial*End
+diceTrial1EndCor <- dice3Col
+if(diceTrial1EndCor == 'r') {diceTrial1EndCor <- 0} else if (diceTrial1EndCor == 'b') {
+  diceTrial1EndCor <- 1} else if (diceTrial1EndCor == 'y') {diceTrial1EndCor <- 2} else if (
+    diceTrial1EndCor == 'p') {diceTrial1EndCor <- 3}
+diceTrial1EndCor <- as.numeric(diceTrial1EndCor == diceTrial1End)
+diceTrial2EndCor <- dice6Col
+if(diceTrial2EndCor == 'r') {diceTrial2EndCor <- 0} else if (diceTrial2EndCor == 'b') {
+  diceTrial2EndCor <- 1} else if (diceTrial2EndCor == 'y') {diceTrial2EndCor <- 2} else if (
+    diceTrial2EndCor == 'p') {diceTrial2EndCor <- 3}
+diceTrial2EndCor <- as.numeric(diceTrial2EndCor == diceTrial2End)
 
-# Stich together per participant
+# Stitch together per participant
 diceParticipant <- cbind(diceMetaStudyID, diceMetaPartID, diceDtD1, diceDtD2, diceDtD3, diceDtD4,
-                         diceDtD5, diceDtD6, diceDtD7, diceDtD8, diceTrial1End, diceTrial2End,
-                         diceTrial1Pre, diceTrial2Pre, dice1Load, dice1LoadCert, dice1LoadWhat,
-                         dice2Load, dice2LoadCert, dice2LoadWhat, dice3Load, dice3LoadCert, 
-                         dice4LoadWhat, dice5Load, dice5LoadCert, dice5LoadWhat, dice6Load,
-                         dice6LoadCert, dice6LoadWhat, dice7Load, dice7LoadCert, dice7LoadWhat,
-                         dice8Load, dice8LoadCert, dice8LoadWhat, dice1Col, dice2Col, dice3Col,
-                         dice4Col, dice5Col, dice6Col, dice7Col, dice8Col)
+                         diceDtD5, diceDtD6, diceDtD7, diceDtD8, diceTrial1End, diceTrial1EndCor,
+                         diceTrial2End, diceTrial2EndCor, diceTrial1Pre, diceTrial2Pre, dice1Load, 
+                         dice1LoadCert, dice1LoadWhat, dice2Load, dice2LoadCert, dice2LoadWhat, 
+                         dice3Load, dice3LoadCert, dice4LoadWhat, dice5Load, dice5LoadCert, 
+                         dice5LoadWhat, dice6Load, dice6LoadCert, dice6LoadWhat, dice7Load, 
+                         dice7LoadCert, dice7LoadWhat, dice8Load, dice8LoadCert, dice8LoadWhat, 
+                         dice1Col, dice2Col, dice3Col, dice4Col, dice5Col, dice6Col, dice7Col, 
+                         dice8Col)
 diceParticipant <- as.data.frame(diceParticipant)
+
+# 03 Stitch together participant data --------------------------------------------------------------
+
 diceTask <- rbind(diceTask, diceParticipant)
 }
+
+# 04 Output CSV-files for raw DtD and choices in 'temp' --------------------------------------------
 
 # Make a variable for each experiment / jatos-file
 filename <- unlist(strsplit(unlist(strsplit(jatFiles[x], "/"))[2], ".txt"))
 assign(filename, diceTask)
 
-# Save cleaned raw-data in 'processed'
-write.csv(diceTask, paste("data/processed/", filename, "_full.csv", sep=""))
+# Save cleaned raw-data in 'temp'
+write.csv(diceTask, paste("data/temp/", filename, "_raw.csv", sep=""))
 
 # Reset diceTask-variable
 diceTask <- NULL          
 }
 
-#2Do: Change metafile and boxtask output names. Fetch limited trials.
+# 05 Clean up --------------------------------------------------------------------------------------
+## Flagging and removal of multiple attempts, and variable-class fix
+
+# Record and remove data without ID's
+## Recode 'null' to NA for one participant in Prolific_1
+jatos_prolific_1[jatos_prolific_1$diceMetaPartID=='null'&!is.na(jatos_prolific_1$diceMetaPartID),
+                 2] <- NA
+## Fetch all NA ID's for meta-file
+hamburgNAs <- c(sum(is.na(jatos_hamburg$diceMetaPartID)), "Missing ID", "Hamburg")
+prolific_1NAs <- c(sum(is.na(jatos_prolific_1$diceMetaPartID)), "Missing ID", "Prolific_1")
+prolific_2NAs <- c(sum(is.na(jatos_prolific_2$diceMetaPartID)), "Missing ID", "Prolific_2")
+students_1NAs <- c(sum(is.na(jatos_students$diceMetaPartID)), "Missing ID", "Students_1")
+students_2NAs <- c(sum(is.na(jatos_students_2$diceMetaPartID)), "Missing ID", "Students_2")
+metaDiceTask <- as.data.frame(rbind(hamburgNAs, prolific_1NAs, prolific_2NAs, students_1NAs,
+                                    students_2NAs))
+## Remove them
+jatos_hamburg <- jatos_hamburg[!is.na(jatos_hamburg$diceMetaPartID),]
+jatos_prolific_1 <- jatos_prolific_1[!is.na(jatos_prolific_1$diceMetaPartID),]
+jatos_prolific_2 <- jatos_prolific_2[!is.na(jatos_prolific_2$diceMetaPartID),]
+jatos_students <- jatos_students[!is.na(jatos_students$diceMetaPartID),]
+jatos_students_2 <- jatos_students_2[!is.na(jatos_students_2$diceMetaPartID),]
+
+# Find duplicate attempts in students (unique ID's, see 'src/functions/duplicate.detective.R')
+remove <- matrix(nrow = nrow(jatos_students), ncol = 1)
+remove <- cbind(as.numeric(jatos_students$diceMetaPartID), remove)
+keep <- (sapply(remove[,1], function(x) sum(as.numeric(x)==students_dice_remove))-1)*-1
+remove[,2] <- (keep-1)*-1
+## Find participants with multiple attempts to be flagged
+included <- NULL
+for (i in remove[remove[,2]==1,1]) {
+  if (i %in% pair01) {included <- c(included,55931)}
+  if (i %in% pair02) {included <- c(included,59154)}
+  if (i %in% pair03) {included <- c(included,43509)}
+  if (i %in% pair04) {included <- c(included,63989)}
+  if (i %in% pair05) {included <- c(included,21324)}
+  if (i %in% pair06) {included <- c(included,88398)}
+  if (i %in% pair07) {included <- c(included,74989)}
+  if (i %in% pair08) {included <- c(included,94207)}
+  if (i %in% pair09) {included <- c(included,93120)}
+  if (i %in% pair10) {included <- c(included,39597)}
+  if (i %in% pair11) {included <- c(included,33985)}
+  if (i %in% pair12) {included <- c(included,"pair12")}
+  if (i %in% pair13) {included <- c(included,31930)}
+  if (i %in% pair14) {included <- c(included,60561)}
+  if (i %in% pair15) {included <- c(included,64825)}
+  if (i %in% pair16) {included <- c(included,80003)}
+  if (i %in% pair17) {included <- c(included,"pair17")}
+  if (i %in% pair18) {included <- c(included,15604)}
+  if (i %in% pair19) {included <- c(included,10392)}
+  if (i %in% pair20) {included <- c(included,19892)}
+  if (i %in% pair21) {included <- c(included,71035)}
+  if (i %in% pair22) {included <- c(included,41672)}
+  if (i %in% pair23) {included <- c(included,"pair23")}
+  if (i %in% pair24) {included <- c(included,94878)}
+  if (i %in% pair25) {included <- c(included,72936)}
+  if (i %in% pair26) {included <- c(included,59674)}
+  if (i %in% pair27) {included <- c(included,73560)}
+  if (i %in% pair28) {included <- c(included,44690)}
+  if (i %in% pair29) {included <- c(included,64622)}
+  if (i %in% pair30) {included <- c(included,12546)}
+  if (i %in% pair31) {included <- c(included,42738)}
+  if (i %in% pair32) {included <- c(included,"pair32")}
+  if (i %in% pair33) {included <- c(included,12837)}
+  if (i %in% pair34) {included <- c(included,11551)}
+}
+## Flagging of first-attempts kept in
+jatos_students$diceMetaMultiAtt <- 0
+for (i in 1:nrow(jatos_students)) {
+  if (as.numeric(jatos_students[i,2]) %in% included) {jatos_students[i,"diceMetaMultiAtt"] <- 1}
+}
+## Save removed to meta-file
+metaDiceTask <- rbind(metaDiceTask, c(sum(keep==0), "Duplicate attempts removed", "Students_1"))
+metaDiceTask <- rbind(metaDiceTask, c(length(unique(included)),
+                                      "Participants with duplicate attempts", "Students_1"))
+metaDiceTask <- rbind(metaDiceTask, c(sum(jatos_students$diceMetaMultiAtt),
+                                      "Participants with first attempt kept", "Students_1"))
+## Actual removal
+jatos_students <- jatos_students[as.logical(keep),]
+
+# Combine the two Prolific data sets
+jatos_prolific <- rbind(jatos_prolific_1, jatos_prolific_2)
+
+# Find duplicate attempts in prolific (based on identical ID)
+## Find duplicate attempts
+duplicates <- duplicated(jatos_prolific$diceMetaPartID)
+## Flagging of first-attempts kept in
+duplicateIDs <- unique(jatos_prolific[duplicates,2])
+jatos_prolific$diceMetaMultiAtt <- 0
+for (i in 1:nrow(jatos_prolific)) {
+  if (jatos_prolific[i,2] %in% duplicateIDs) {jatos_prolific[i,"diceMetaMultiAtt"] <- 1}
+}
+## Save removed to meta-file
+metaDiceTask <- rbind(metaDiceTask, c(sum(duplicates), "Duplicate attempts removed", "Prolific_1&2"))
+metaDiceTask <- rbind(metaDiceTask, c(length(duplicateIDs), 
+                                      "Participants with duplicate attempts", "Prolific_1&2"))
+metaDiceTask <- rbind(metaDiceTask, c(length(duplicateIDs), "Participants with first attempt kept",
+                                      "Prolific_1&2"))
+## Actual removal
+keep <- (duplicates-1)*-1
+jatos_prolific <- jatos_prolific[as.logical(keep),]
+
+# Find duplicate attempts in students_2 data (based on identical ID)
+## Find duplicate attempts
+duplicates <- duplicated(jatos_students_2$diceMetaPartID)
+## Flagging of first-attempts kept in
+duplicateIDs <- unique(jatos_students_2[duplicates,2])
+jatos_students_2$diceMetaMultiAtt <- 0
+for (i in 1:nrow(jatos_students_2)) {
+  if (jatos_students_2[i,2] %in% duplicateIDs) {jatos_students_2[i,"diceMetaMultiAtt"] <- 1}
+}
+## Save removed to meta-file
+metaDiceTask <- rbind(metaDiceTask, c(sum(duplicates), "Duplicate attempts removed", "Students_2"))
+metaDiceTask <- rbind(metaDiceTask, c(length(duplicateIDs), 
+                                      "Participants with duplicate attempts", "Students_2"))
+metaDiceTask <- rbind(metaDiceTask, c(length(duplicateIDs), "Participants with first attempt kept",
+                                      "Students_2"))
+## Actual removal
+keep <- (duplicates-1)*-1
+jatos_students_2 <- jatos_students_2[as.logical(keep),]
+
+# Merge student data
+## Fix students ID (contain leading white space)
+jatos_students$diceMetaPartID <- as.numeric(as.character(jatos_students$diceMetaPartID))
+jatos_students <- rbind(jatos_students, jatos_students_2)
+
+# Check for duplicate ID's in all data. If any, they must be dealt with before moving on!
+if(sum(duplicated(jatos_hamburg$diceMetaPartID))!=0){print("Duplicates in Hamburg data!")}
+if(sum(duplicated(jatos_prolific$diceMetaPartID))!=0){print("Duplicates in Prolific data!")}
+if(sum(duplicated(jatos_students$diceMetaPartID))!=0){print("Duplicates in Students data!")}
+if(sum(duplicated(jatos_students_2$diceMetaPartID))!=0){print("Duplicates in Students_2 data!")}
+
+# Set IDs as row names
+row.names(jatos_hamburg) <- jatos_hamburg[,2]
+jatos_hamburg <- jatos_hamburg[,-2]
+row.names(jatos_prolific) <- jatos_prolific[,2]
+jatos_prolific <- jatos_prolific[,-2]
+row.names(jatos_students) <- jatos_students[,2]
+jatos_students <- jatos_students[,-2]
+
+# 06 Variable creation -----------------------------------------------------------------------------
+
+# 07 Output CSV-files for all data in 'processed' --------------------------------------------------
+
+# Fix row & col names to match that of other tasks
+#colnames(3x dfs)
+row.names(metaDiceTask) <- NULL
+colnames(metaDiceTask) <- c("N affected","Reason","Sample pool")
+
+# Remove course-only participant and record in meta
+metaCourse <- sum(row.names(jatos_students)=="2334")
+metaDiceTask <- rbind(metaDiceTask, c(metaCourse, "Participants excluded for science",
+                                      "Students_2"))
+jatos_students <- jatos_students[row.names(jatos_students)!="2334",]
+
+# Create summary-file
+
+# Create full-data file
+
+# Create meta file
+write.csv(metaDiceTask, "data/processed/meta_dice-task.csv")
+
+#2Do: Fetch limited trials. Make variables into numeric
