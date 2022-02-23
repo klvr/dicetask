@@ -161,11 +161,11 @@ diceParticipant <- cbind(diceMetaStudyID, diceMetaPartID, diceDtD1, diceDtD2, di
                          diceDtD5, diceDtD6, diceDtD7, diceDtD8, diceTrial1End, diceTrial1EndCor,
                          diceTrial2End, diceTrial2EndCor, diceTrial1Pre, diceTrial2Pre, dice1Load, 
                          dice1LoadCert, dice1LoadWhat, dice2Load, dice2LoadCert, dice2LoadWhat, 
-                         dice3Load, dice3LoadCert, dice4LoadWhat, dice5Load, dice5LoadCert, 
-                         dice5LoadWhat, dice6Load, dice6LoadCert, dice6LoadWhat, dice7Load, 
-                         dice7LoadCert, dice7LoadWhat, dice8Load, dice8LoadCert, dice8LoadWhat, 
-                         dice1Col, dice2Col, dice3Col, dice4Col, dice5Col, dice6Col, dice7Col, 
-                         dice8Col)
+                         dice3Load, dice3LoadCert, dice3LoadWhat, dice4Load, dice4LoadCert,
+                         dice4LoadWhat, dice5Load, dice5LoadCert, dice5LoadWhat, dice6Load, 
+                         dice6LoadCert, dice6LoadWhat, dice7Load, dice7LoadCert, dice7LoadWhat, 
+                         dice8Load, dice8LoadCert, dice8LoadWhat, dice1Col, dice2Col, dice3Col,
+                         dice4Col, dice5Col, dice6Col, dice7Col, dice8Col)
 diceParticipant <- as.data.frame(diceParticipant)
 
 # 03 Stitch together participant data --------------------------------------------------------------
@@ -325,7 +325,321 @@ jatos_prolific <- jatos_prolific[,-2]
 row.names(jatos_students) <- jatos_students[,2]
 jatos_students <- jatos_students[,-2]
 
+# Convert relevant variables from character to numeric
+changevars <- c(2:9, 11, 13, seq(16,37,3), seq(17,38,3))
+for (i in changevars) {
+  jatos_hamburg[,i] <- as.numeric(jatos_hamburg[,i])
+  jatos_prolific[,i] <- as.numeric(jatos_prolific[,i])
+  jatos_students[,i] <- as.numeric(jatos_students[,i])
+}
+
+# Add non-informative "diceMetaMultiAtt" for Hamburg data, so rows match with other experiments
+jatos_hamburg$diceMetaMultiAtt <- 0
+
 # 06 Variable creation -----------------------------------------------------------------------------
+## Following the exclusion criteria variables, most variables are created in two ways, one with, and
+## one without the excluded trials. Latter denoted with an 'E' at the end of the variable name.
+
+# Variables for exclusion purposes
+## Create 'DtD'-based exclusion criteria variables
+### Trial wise mean DtD =< 2
+jatos_hamburg$excludeDtDTrial1 <- rowSums(jatos_hamburg[,2:5])<9
+jatos_hamburg$excludeDtDTrial2 <- rowSums(jatos_hamburg[,6:9])<9
+jatos_prolific$excludeDtDTrial1 <- rowSums(jatos_prolific[,2:5])<9
+jatos_prolific$excludeDtDTrial2 <- rowSums(jatos_prolific[,6:9])<9
+jatos_students$excludeDtDTrial1 <- rowSums(jatos_students[,2:5])<9
+jatos_students$excludeDtDTrial2 <- rowSums(jatos_students[,6:9])<9
+### Overall mean trial wise exclusion (0: no trials to be excluded, 1: all trials to be excluded)
+jatos_hamburg$excludeDtDOverall <- rowMeans(jatos_hamburg[,49:50])
+jatos_prolific$excludeDtDOverall <- rowMeans(jatos_prolific[,49:50])
+jatos_students$excludeDtDOverall <- rowMeans(jatos_students[,49:50])
+
+# Variables for 'score' and attention / comprehension and checks
+## Per dice, was the participant correct in reported loadedness
+### Trial-wise correctness
+jatos_hamburg$diceIndLoadTrial1 <- rowMeans(cbind(jatos_hamburg[,c(16,19,25)],
+                                                  ((jatos_hamburg[,22]-1)*-1)))
+jatos_hamburg$diceIndLoadTrial2 <- rowMeans(cbind(jatos_hamburg[,c(28,34,37)],
+                                                  ((jatos_hamburg[,31]-1)*-1)))
+jatos_prolific$diceIndLoadTrial1 <- rowMeans(cbind(jatos_prolific[,c(16,19,25)],
+                                                  ((jatos_prolific[,22]-1)*-1)))
+jatos_prolific$diceIndLoadTrial2 <- rowMeans(cbind(jatos_prolific[,c(28,34,37)],
+                                                  ((jatos_prolific[,31]-1)*-1)))
+jatos_students$diceIndLoadTrial1 <- rowMeans(cbind(jatos_students[,c(16,19,25)],
+                                                  ((jatos_students[,22]-1)*-1)))
+jatos_students$diceIndLoadTrial2 <- rowMeans(cbind(jatos_students[,c(28,34,37)],
+                                                  ((jatos_students[,31]-1)*-1)))
+jatos_hamburg$diceIndLoadTrial1E <- jatos_hamburg$diceIndLoadTrial1
+jatos_hamburg$diceIndLoadTrial1E <- replace(jatos_hamburg$diceIndLoadTrial1E, 
+                                            jatos_hamburg$excludeDtDTrial1, NA)
+jatos_hamburg$diceIndLoadTrial2E <- jatos_hamburg$diceIndLoadTrial2
+jatos_hamburg$diceIndLoadTrial2E <- replace(jatos_hamburg$diceIndLoadTrial2E, 
+                                            jatos_hamburg$excludeDtDTrial2, NA)
+jatos_prolific$diceIndLoadTrial1E <- jatos_prolific$diceIndLoadTrial1
+jatos_prolific$diceIndLoadTrial1E <- replace(jatos_prolific$diceIndLoadTrial1E, 
+                                            jatos_prolific$excludeDtDTrial1, NA)
+jatos_prolific$diceIndLoadTrial2E <- jatos_prolific$diceIndLoadTrial2
+jatos_prolific$diceIndLoadTrial2E <- replace(jatos_prolific$diceIndLoadTrial2E, 
+                                            jatos_prolific$excludeDtDTrial2, NA)
+jatos_students$diceIndLoadTrial1E <- jatos_students$diceIndLoadTrial1
+jatos_students$diceIndLoadTrial1E <- replace(jatos_students$diceIndLoadTrial1E, 
+                                            jatos_students$excludeDtDTrial1, NA)
+jatos_students$diceIndLoadTrial2E <- jatos_students$diceIndLoadTrial2
+jatos_students$diceIndLoadTrial2E <- replace(jatos_students$diceIndLoadTrial2E, 
+                                            jatos_students$excludeDtDTrial2, NA)
+### Overall correctness
+jatos_hamburg$diceIndLoadOverall <- rowMeans(jatos_hamburg[,c(52,53)])
+jatos_prolific$diceIndLoadOverall <- rowMeans(jatos_prolific[,c(52,53)])
+jatos_students$diceIndLoadOverall <- rowMeans(jatos_students[,c(52,53)])
+jatos_hamburg$diceIndLoadOverallE <- rowMeans(jatos_hamburg[,c(54,55)], na.rm = TRUE)
+jatos_hamburg$diceIndLoadOverallE <- replace(jatos_hamburg$diceIndLoadOverallE, 
+                                             is.nan(jatos_hamburg$diceIndLoadOverallE), NA)
+jatos_prolific$diceIndLoadOverallE <- rowMeans(jatos_prolific[,c(54,55)], na.rm = TRUE)
+jatos_prolific$diceIndLoadOverallE <- replace(jatos_prolific$diceIndLoadOverallE, 
+                                             is.nan(jatos_prolific$diceIndLoadOverallE), NA)
+jatos_students$diceIndLoadOverallE <- rowMeans(jatos_students[,c(54,55)], na.rm = TRUE)
+jatos_students$diceIndLoadOverallE <- replace(jatos_students$diceIndLoadOverallE, 
+                                             is.nan(jatos_students$diceIndLoadOverallE), NA)
+### Pre loaded die correctness
+jatos_hamburg$diceIndLoadPre <- rowMeans(jatos_hamburg[,c(16,19,28)])
+jatos_hamburg$diceIndLoadPreE <- rowMeans(cbind(replace(jatos_hamburg[,16], jatos_hamburg[,49], NA),
+                                                replace(jatos_hamburg[,19], jatos_hamburg[,49], NA),
+                                                replace(jatos_hamburg[,28], jatos_hamburg[,50], NA)),
+                                          na.rm=TRUE)
+jatos_hamburg$diceIndLoadPreE <- replace(jatos_hamburg$diceIndLoadPreE,
+                                         is.nan(jatos_hamburg$diceIndLoadPreE), NA)
+jatos_prolific$diceIndLoadPre <- rowMeans(jatos_prolific[,c(16,19,28)])
+jatos_prolific$diceIndLoadPreE <- rowMeans(cbind(replace(jatos_prolific[,16], jatos_prolific[,49], NA),
+                                                replace(jatos_prolific[,19], jatos_prolific[,49], NA),
+                                                replace(jatos_prolific[,28], jatos_prolific[,50], NA)),
+                                          na.rm=TRUE)
+jatos_prolific$diceIndLoadPreE <- replace(jatos_prolific$diceIndLoadPreE,
+                                         is.nan(jatos_prolific$diceIndLoadPreE), NA)
+jatos_students$diceIndLoadPre <- rowMeans(jatos_students[,c(16,19,28)])
+jatos_students$diceIndLoadPreE <- rowMeans(cbind(replace(jatos_students[,16], jatos_students[,49], NA),
+                                                replace(jatos_students[,19], jatos_students[,49], NA),
+                                                replace(jatos_students[,28], jatos_students[,50], NA)),
+                                          na.rm=TRUE)
+jatos_students$diceIndLoadPreE <- replace(jatos_students$diceIndLoadPreE,
+                                         is.nan(jatos_students$diceIndLoadPreE), NA)
+### At loaded die correctness
+jatos_hamburg$diceIndLoadAt <- rowMeans(jatos_hamburg[,c(22,31)])
+jatos_hamburg$diceIndLoadAtE <- rowMeans(cbind(replace(jatos_hamburg[,22], jatos_hamburg[,49], NA),
+                                              replace(jatos_hamburg[,31], jatos_hamburg[,50], NA)),
+                                        na.rm=TRUE)
+jatos_hamburg$diceIndLoadAtE <- replace(jatos_hamburg$diceIndLoadAtE,
+                                        is.nan(jatos_hamburg$diceIndLoadAtE), NA)
+jatos_prolific$diceIndLoadAt <- rowMeans(jatos_prolific[,c(22,31)])
+jatos_prolific$diceIndLoadAtE <- rowMeans(cbind(replace(jatos_prolific[,22], jatos_prolific[,49], NA),
+                                                replace(jatos_prolific[,31], jatos_prolific[,50], NA)),
+                                          na.rm=TRUE)
+jatos_prolific$diceIndLoadAtE <- replace(jatos_prolific$diceIndLoadAtE,
+                                        is.nan(jatos_prolific$diceIndLoadAtE), NA)
+jatos_students$diceIndLoadAt <- rowMeans(jatos_students[,c(22,31)])
+jatos_students$diceIndLoadAtE <- rowMeans(cbind(replace(jatos_students[,22], jatos_students[,49], NA),
+                                                replace(jatos_students[,31], jatos_students[,50], NA)),
+                                          na.rm=TRUE)
+jatos_students$diceIndLoadAtE <- replace(jatos_students$diceIndLoadAtE,
+                                        is.nan(jatos_students$diceIndLoadAtE), NA)
+### Post loaded die correctness
+jatos_hamburg$diceIndLoadPost <- rowMeans(jatos_hamburg[,c(25,34,37)])
+jatos_hamburg$diceIndLoadPostE <- rowMeans(cbind(replace(jatos_hamburg[,25], jatos_hamburg[,49], NA),
+                                                replace(jatos_hamburg[,34], jatos_hamburg[,50], NA),
+                                                replace(jatos_hamburg[,37], jatos_hamburg[,50], NA)),
+                                          na.rm=TRUE)
+jatos_hamburg$diceIndLoadPostE <- replace(jatos_hamburg$diceIndLoadPostE,
+                                          is.nan(jatos_hamburg$diceIndLoadPostE), NA)
+jatos_prolific$diceIndLoadPost <- rowMeans(jatos_prolific[,c(25,34,37)])
+jatos_prolific$diceIndLoadPostE <- rowMeans(cbind(replace(jatos_prolific[,25], jatos_prolific[,49], NA),
+                                                 replace(jatos_prolific[,34], jatos_prolific[,50], NA),
+                                                 replace(jatos_prolific[,37], jatos_prolific[,50], NA)),
+                                           na.rm=TRUE)
+jatos_prolific$diceIndLoadPostE <- replace(jatos_prolific$diceIndLoadPostE,
+                                          is.nan(jatos_prolific$diceIndLoadPostE), NA)
+jatos_students$diceIndLoadPost <- rowMeans(jatos_students[,c(25,34,37)])
+jatos_students$diceIndLoadPostE <- rowMeans(cbind(replace(jatos_students[,25], jatos_students[,49], NA),
+                                                 replace(jatos_students[,34], jatos_students[,50], NA),
+                                                 replace(jatos_students[,37], jatos_students[,50], NA)),
+                                           na.rm=TRUE)
+jatos_students$diceIndLoadPostE <- replace(jatos_students$diceIndLoadPostE,
+                                           is.nan(jatos_students$diceIndLoadPostE), NA)
+## For the loaded dice, was the participant correct in reported 'what' it was loaded on
+### Returns 1 if correct (per trial), 0 if incorrect, NA if not reported loaded or excluded
+jatos_hamburg$diceIndLoad1Cor <- as.numeric(jatos_hamburg$dice3LoadWhat)
+jatos_hamburg$diceIndLoad1Cor <- replace(jatos_hamburg$diceIndLoad1Cor,
+                                         jatos_hamburg$diceIndLoad1Cor!=4, 0)
+jatos_hamburg$diceIndLoad1Cor <- replace(jatos_hamburg$diceIndLoad1Cor,
+                                         jatos_hamburg$diceIndLoad1Cor==4, 1)
+jatos_hamburg$diceIndLoad1CorE <- replace(jatos_hamburg$diceIndLoad1Cor, 
+                                          jatos_hamburg$excludeDtDTrial1, NA)
+jatos_hamburg$diceIndLoad2Cor <- as.numeric(jatos_hamburg$dice6LoadWhat)
+jatos_hamburg$diceIndLoad2Cor <- replace(jatos_hamburg$diceIndLoad2Cor,
+                                         jatos_hamburg$diceIndLoad2Cor!=3, 0)
+jatos_hamburg$diceIndLoad2Cor <- replace(jatos_hamburg$diceIndLoad2Cor,
+                                         jatos_hamburg$diceIndLoad2Cor==3, 1)
+jatos_hamburg$diceIndLoad2CorE <- replace(jatos_hamburg$diceIndLoad2Cor, 
+                                          jatos_hamburg$excludeDtDTrial2, NA)
+jatos_prolific$diceIndLoad1Cor <- as.numeric(jatos_prolific$dice3LoadWhat)
+jatos_prolific$diceIndLoad1Cor <- replace(jatos_prolific$diceIndLoad1Cor,
+                                         jatos_prolific$diceIndLoad1Cor!=4, 0)
+jatos_prolific$diceIndLoad1Cor <- replace(jatos_prolific$diceIndLoad1Cor,
+                                         jatos_prolific$diceIndLoad1Cor==4, 1)
+jatos_prolific$diceIndLoad1CorE <- replace(jatos_prolific$diceIndLoad1Cor, 
+                                          jatos_prolific$excludeDtDTrial1, NA)
+jatos_prolific$diceIndLoad2Cor <- as.numeric(jatos_prolific$dice6LoadWhat)
+jatos_prolific$diceIndLoad2Cor <- replace(jatos_prolific$diceIndLoad2Cor,
+                                         jatos_prolific$diceIndLoad2Cor!=3, 0)
+jatos_prolific$diceIndLoad2Cor <- replace(jatos_prolific$diceIndLoad2Cor,
+                                         jatos_prolific$diceIndLoad2Cor==3, 1)
+jatos_prolific$diceIndLoad2CorE <- replace(jatos_prolific$diceIndLoad2Cor, 
+                                          jatos_prolific$excludeDtDTrial2, NA)
+jatos_students$diceIndLoad1Cor <- as.numeric(jatos_students$dice3LoadWhat)
+jatos_students$diceIndLoad1Cor <- replace(jatos_students$diceIndLoad1Cor,
+                                         jatos_students$diceIndLoad1Cor!=4, 0)
+jatos_students$diceIndLoad1Cor <- replace(jatos_students$diceIndLoad1Cor,
+                                         jatos_students$diceIndLoad1Cor==4, 1)
+jatos_students$diceIndLoad1CorE <- replace(jatos_students$diceIndLoad1Cor, 
+                                          jatos_students$excludeDtDTrial1, NA)
+jatos_students$diceIndLoad2Cor <- as.numeric(jatos_students$dice6LoadWhat)
+jatos_students$diceIndLoad2Cor <- replace(jatos_students$diceIndLoad2Cor,
+                                         jatos_students$diceIndLoad2Cor!=3, 0)
+jatos_students$diceIndLoad2Cor <- replace(jatos_students$diceIndLoad2Cor,
+                                         jatos_students$diceIndLoad2Cor==3, 1)
+jatos_students$diceIndLoad2CorE <- replace(jatos_students$diceIndLoad2Cor, 
+                                          jatos_students$excludeDtDTrial2, NA)
+## Was the participant correct at the end stage
+### Variables already exists, diceTrial*EndCor, so only making the excluded variant
+jatos_hamburg$diceTrial1EndCorE <- replace(jatos_hamburg$diceTrial1EndCor,
+                                           jatos_hamburg$excludeDtDTrial1, NA)
+jatos_hamburg$diceTrial2EndCorE <- replace(jatos_hamburg$diceTrial2EndCor,
+                                           jatos_hamburg$excludeDtDTrial2, NA)
+jatos_prolific$diceTrial1EndCorE <- replace(jatos_prolific$diceTrial1EndCor,
+                                            jatos_prolific$excludeDtDTrial1, NA)
+jatos_prolific$diceTrial2EndCorE <- replace(jatos_prolific$diceTrial2EndCor,
+                                            jatos_prolific$excludeDtDTrial2, NA)
+jatos_students$diceTrial1EndCorE <- replace(jatos_students$diceTrial1EndCor,
+                                            jatos_students$excludeDtDTrial1, NA)
+jatos_students$diceTrial2EndCorE <- replace(jatos_students$diceTrial2EndCor,
+                                            jatos_students$excludeDtDTrial2, NA)
+### Summary score - Mean trial 1 and 2
+jatos_hamburg$diceEndCorOverall <- rowMeans(jatos_hamburg[,c(11,13)])
+jatos_hamburg$diceEndCorOverallE <- rowMeans(jatos_hamburg[,c(68,69)], na.rm = TRUE)
+jatos_prolific$diceEndCorOverall <- rowMeans(jatos_prolific[,c(11,13)])
+jatos_prolific$diceEndCorOverallE <- rowMeans(jatos_prolific[,c(68,69)], na.rm = TRUE)
+jatos_students$diceEndCorOverall <- rowMeans(jatos_students[,c(11,13)])
+jatos_students$diceEndCorOverallE <- rowMeans(jatos_students[,c(68,69)], na.rm = TRUE)
+
+# Variables for information sampled (DtD)
+## DtD - Trial, pre, load, post trial and overall
+## Trial-wise DtD
+jatos_hamburg$diceDtDTrial1 <- rowSums(jatos_hamburg[,c(2,3,4,5)])
+jatos_hamburg$diceDtDTrial2 <- rowSums(jatos_hamburg[,c(6,7,8,9)])
+jatos_prolific$diceDtDTrial1 <- rowSums(jatos_prolific[,c(2,3,4,5)])
+jatos_prolific$diceDtDTrial2 <- rowSums(jatos_prolific[,c(6,7,8,9)])
+jatos_students$diceDtDTrial1 <- rowSums(jatos_students[,c(2,3,4,5)])
+jatos_students$diceDtDTrial2 <- rowSums(jatos_students[,c(6,7,8,9)])
+jatos_hamburg$diceDtDTrial1E <- jatos_hamburg$diceDtDTrial1
+jatos_hamburg$diceDtDTrial1E <- replace(jatos_hamburg$diceDtDTrial1E, 
+                                            jatos_hamburg$excludeDtDTrial1, NA)
+jatos_hamburg$diceDtDTrial2E <- jatos_hamburg$diceDtDTrial2
+jatos_hamburg$diceDtDTrial2E <- replace(jatos_hamburg$diceDtDTrial2E, 
+                                            jatos_hamburg$excludeDtDTrial2, NA)
+jatos_prolific$diceDtDTrial1E <- jatos_prolific$diceDtDTrial1
+jatos_prolific$diceDtDTrial1E <- replace(jatos_prolific$diceDtDTrial1E, 
+                                             jatos_prolific$excludeDtDTrial1, NA)
+jatos_prolific$diceDtDTrial2E <- jatos_prolific$diceDtDTrial2
+jatos_prolific$diceDtDTrial2E <- replace(jatos_prolific$diceDtDTrial2E, 
+                                             jatos_prolific$excludeDtDTrial2, NA)
+jatos_students$diceDtDTrial1E <- jatos_students$diceDtDTrial1
+jatos_students$diceDtDTrial1E <- replace(jatos_students$diceDtDTrial1E, 
+                                             jatos_students$excludeDtDTrial1, NA)
+jatos_students$diceDtDTrial2E <- jatos_students$diceDtDTrial2
+jatos_students$diceDtDTrial2E <- replace(jatos_students$diceDtDTrial2E, 
+                                             jatos_students$excludeDtDTrial2, NA)
+## Mean trial-wise DtD
+### Use mean instead of sum, so that trial-wise exclusion is meaningful
+jatos_hamburg$diceDtDOverall <- rowMeans(jatos_hamburg[,c(72,73)])
+jatos_prolific$diceDtDOverall <- rowMeans(jatos_prolific[,c(72,73)])
+jatos_students$diceDtDOverall <- rowMeans(jatos_students[,c(72,73)])
+jatos_hamburg$diceDtDOverallE <- rowMeans(jatos_hamburg[,c(74,75)], na.rm = TRUE)
+jatos_hamburg$diceDtDOverallE <- replace(jatos_hamburg$diceDtDOverallE, 
+                                             is.nan(jatos_hamburg$diceDtDOverallE), NA)
+jatos_prolific$diceDtDOverallE <- rowMeans(jatos_prolific[,c(74,75)], na.rm = TRUE)
+jatos_prolific$diceDtDOverallE <- replace(jatos_prolific$diceDtDOverallE, 
+                                              is.nan(jatos_prolific$diceDtDOverallE), NA)
+jatos_students$diceDtDOverallE <- rowMeans(jatos_students[,c(74,75)], na.rm = TRUE)
+jatos_students$diceDtDOverallE <- replace(jatos_students$diceDtDOverallE, 
+                                              is.nan(jatos_students$diceDtDOverallE), NA)
+### Mean pre loaded dice DtD
+### Use mean instead of sum, so that trial-wise exclusion is meaningful
+jatos_hamburg$diceDtDPre <- rowMeans(jatos_hamburg[,c(2,3,6)])
+jatos_hamburg$diceDtDPreE <- rowMeans(cbind(replace(jatos_hamburg[,2], jatos_hamburg[,49], NA),
+                                                 replace(jatos_hamburg[,3], jatos_hamburg[,49], NA),
+                                                 replace(jatos_hamburg[,6], jatos_hamburg[,50], NA)),
+                                           na.rm=TRUE)
+jatos_hamburg$diceDtDPreE <- replace(jatos_hamburg$diceDtDPreE,
+                                          is.nan(jatos_hamburg$diceDtDPreE), NA)
+jatos_prolific$diceDtDPre <- rowMeans(jatos_prolific[,c(2,3,6)])
+jatos_prolific$diceDtDPreE <- rowMeans(cbind(replace(jatos_prolific[,2], jatos_prolific[,49], NA),
+                                                  replace(jatos_prolific[,3], jatos_prolific[,49], NA),
+                                                  replace(jatos_prolific[,6], jatos_prolific[,50], NA)),
+                                            na.rm=TRUE)
+jatos_prolific$diceDtDPreE <- replace(jatos_prolific$diceDtDPreE,
+                                           is.nan(jatos_prolific$diceDtDPreE), NA)
+jatos_students$diceDtDPre <- rowMeans(jatos_students[,c(2,3,6)])
+jatos_students$diceDtDPreE <- rowMeans(cbind(replace(jatos_students[,2], jatos_students[,49], NA),
+                                                  replace(jatos_students[,3], jatos_students[,49], NA),
+                                                  replace(jatos_students[,6], jatos_students[,50], NA)),
+                                            na.rm=TRUE)
+jatos_students$diceDtDPreE <- replace(jatos_students$diceDtDPreE,
+                                           is.nan(jatos_students$diceDtDPreE), NA)
+### Mean at loaded dice DtD
+### Use mean instead of sum, so that trial-wise exclusion is meaningful
+jatos_hamburg$diceDtDAt <- rowMeans(jatos_hamburg[,c(4,7)])
+jatos_hamburg$diceDtDAtE <- rowMeans(cbind(replace(jatos_hamburg[,4], jatos_hamburg[,49], NA),
+                                                 replace(jatos_hamburg[,7], jatos_hamburg[,50], NA)),
+                                           na.rm=TRUE)
+jatos_hamburg$diceDtDAtE <- replace(jatos_hamburg$diceDtDAtE,
+                                          is.nan(jatos_hamburg$diceDtDAtE), NA)
+jatos_prolific$diceDtDAt <- rowMeans(jatos_prolific[,c(4,7)])
+jatos_prolific$diceDtDAtE <- rowMeans(cbind(replace(jatos_prolific[,4], jatos_prolific[,49], NA),
+                                                  replace(jatos_prolific[,7], jatos_prolific[,50], NA)),
+                                            na.rm=TRUE)
+jatos_prolific$diceDtDAtE <- replace(jatos_prolific$diceDtDAtE,
+                                           is.nan(jatos_prolific$diceDtDAtE), NA)
+jatos_students$diceDtDAt <- rowMeans(jatos_students[,c(4,7)])
+jatos_students$diceDtDAtE <- rowMeans(cbind(replace(jatos_students[,4], jatos_students[,49], NA),
+                                                  replace(jatos_students[,7], jatos_students[,50], NA)),
+                                            na.rm=TRUE)
+jatos_students$diceDtDAtE <- replace(jatos_students$diceDtDAtE,
+                                           is.nan(jatos_students$diceDtDAtE), NA)
+### Mean post loaded dice DtD
+### Use mean instead of sum, so that trial-wise exclusion is meaningful
+jatos_hamburg$diceDtDPost <- rowMeans(jatos_hamburg[,c(5,8,9)])
+jatos_hamburg$diceDtDPostE <- rowMeans(cbind(replace(jatos_hamburg[,5], jatos_hamburg[,49], NA),
+                                                 replace(jatos_hamburg[,8], jatos_hamburg[,50], NA),
+                                                 replace(jatos_hamburg[,9], jatos_hamburg[,50], NA)),
+                                           na.rm=TRUE)
+jatos_hamburg$diceDtDPostE <- replace(jatos_hamburg$diceDtDPostE,
+                                          is.nan(jatos_hamburg$diceDtDPostE), NA)
+jatos_prolific$diceDtDPost <- rowMeans(jatos_prolific[,c(5,8,9)])
+jatos_prolific$diceDtDPostE <- rowMeans(cbind(replace(jatos_prolific[,5], jatos_prolific[,49], NA),
+                                                  replace(jatos_prolific[,8], jatos_prolific[,50], NA),
+                                                  replace(jatos_prolific[,9], jatos_prolific[,50], NA)),
+                                            na.rm=TRUE)
+jatos_prolific$diceDtDPostE <- replace(jatos_prolific$diceDtDPostE,
+                                           is.nan(jatos_prolific$diceDtDPostE), NA)
+jatos_students$diceDtDPost <- rowMeans(jatos_students[,c(5,8,9)])
+jatos_students$diceDtDPostE <- rowMeans(cbind(replace(jatos_students[,5], jatos_students[,49], NA),
+                                                  replace(jatos_students[,8], jatos_students[,50], NA),
+                                                  replace(jatos_students[,9], jatos_students[,50], NA)),
+                                            na.rm=TRUE)
+jatos_students$diceDtDPostE <- replace(jatos_students$diceDtDPostE,
+                                           is.nan(jatos_students$diceDtDPostE), NA)
+
+# Variables for reported / subjective confidence
+## Certianty (Pre, load, post, overall, trial and overall)
+
 
 # 07 Output CSV-files for all data in 'processed' --------------------------------------------------
 
@@ -346,5 +660,3 @@ jatos_students <- jatos_students[row.names(jatos_students)!="2334",]
 
 # Create meta file
 write.csv(metaDiceTask, "data/processed/meta_dice-task.csv")
-
-#2Do: Fetch limited trials. Make variables into numeric
