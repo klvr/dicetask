@@ -180,7 +180,7 @@ filename <- unlist(strsplit(unlist(strsplit(jatFiles[x], "/"))[2], ".txt"))
 assign(filename, diceTask)
 
 # Save cleaned raw-data in 'temp'
-write.csv(diceTask, paste("data/temp/", filename, "_raw.csv", sep=""))
+write.csv(diceTask, paste("data/temp/", filename, "_temp.csv", sep=""))
 
 # Reset diceTask-variable
 diceTask <- NULL          
@@ -355,6 +355,13 @@ jatos_prolific$excludeDtDOverall <- rowMeans(jatos_prolific[,49:50])
 jatos_students$excludeDtDOverall <- rowMeans(jatos_students[,49:50])
 
 # Variables for 'score' and attention / comprehension and checks
+## Did the participant have a preconcived notion of loadedness (1: yes, 0: no; recoding)
+jatos_hamburg$diceTrial1Pre <- replace(jatos_hamburg$diceTrial1Pre, jatos_hamburg$diceTrial1Pre!=0, 1)
+jatos_hamburg$diceTrial2Pre <- replace(jatos_hamburg$diceTrial2Pre, jatos_hamburg$diceTrial2Pre!=0, 1)
+jatos_prolific$diceTrial1Pre <- replace(jatos_prolific$diceTrial1Pre, jatos_prolific$diceTrial1Pre!=0, 1)
+jatos_prolific$diceTrial2Pre <- replace(jatos_prolific$diceTrial2Pre, jatos_prolific$diceTrial2Pre!=0, 1)
+jatos_students$diceTrial1Pre <- replace(jatos_students$diceTrial1Pre, jatos_students$diceTrial1Pre!=0, 1)
+jatos_students$diceTrial2Pre <- replace(jatos_students$diceTrial2Pre, jatos_students$diceTrial2Pre!=0, 1)
 ## Per dice, was the participant correct in reported loadedness
 ### Trial-wise correctness
 jatos_hamburg$diceIndLoadTrial1 <- rowMeans(cbind(jatos_hamburg[,c(16,19,25)],
@@ -524,10 +531,16 @@ jatos_students$diceTrial2EndCorE <- replace(jatos_students$diceTrial2EndCor,
 ### Summary score - Mean trial 1 and 2
 jatos_hamburg$diceEndCorOverall <- rowMeans(jatos_hamburg[,c(11,13)])
 jatos_hamburg$diceEndCorOverallE <- rowMeans(jatos_hamburg[,c(68,69)], na.rm = TRUE)
+jatos_hamburg$diceEndCorOverallE <- replace(jatos_hamburg$diceEndCorOverallE, 
+                                            is.nan(jatos_hamburg$diceEndCorOverallE), NA)
 jatos_prolific$diceEndCorOverall <- rowMeans(jatos_prolific[,c(11,13)])
 jatos_prolific$diceEndCorOverallE <- rowMeans(jatos_prolific[,c(68,69)], na.rm = TRUE)
+jatos_prolific$diceEndCorOverallE <- replace(jatos_prolific$diceEndCorOverallE, 
+                                            is.nan(jatos_prolific$diceEndCorOverallE), NA)
 jatos_students$diceEndCorOverall <- rowMeans(jatos_students[,c(11,13)])
 jatos_students$diceEndCorOverallE <- rowMeans(jatos_students[,c(68,69)], na.rm = TRUE)
+jatos_students$diceEndCorOverallE <- replace(jatos_students$diceEndCorOverallE, 
+                                            is.nan(jatos_students$diceEndCorOverallE), NA)
 
 # Variables for information sampled (DtD)
 ## DtD - Trial, pre, load, post trial and overall
@@ -771,7 +784,9 @@ metaDiceTask <- rbind(metaDiceTask, c(sum(jatos_students[jatos_students$diceMeta
 # 07 Output CSV-files for all data in 'processed' --------------------------------------------------
 
 # Fix row & col names to match that of other tasks
-#colnames(3x dfs)
+colnames(jatos_hamburg)[49:51] <- c("diceExclTrial1","diceExclTrial2","diceExclOverall")
+colnames(jatos_prolific)[49:51] <- c("diceExclTrial1","diceExclTrial2","diceExclOverall")
+colnames(jatos_students)[49:51] <- c("diceExclTrial1","diceExclTrial2","diceExclOverall")
 row.names(metaDiceTask) <- NULL
 colnames(metaDiceTask) <- c("N affected","Reason","Sample pool")
 
@@ -782,8 +797,17 @@ metaDiceTask <- rbind(metaDiceTask, c(metaCourse, "Participants excluded for sci
 jatos_students <- jatos_students[row.names(jatos_students)!="2334",]
 
 # Create summary-file
+write.csv(jatos_hamburg[,-c(2:10,12,16:47,49,50,52,53,seq(56,66,2),70,72,73,seq(76,94,2))],
+          "data/processed/dice-task_hamburg_summary.csv")
+write.csv(jatos_prolific[,-c(2:10,12,16:47,49,50,52,53,seq(56,66,2),70,72,73,seq(76,94,2))],
+          "data/processed/dice-task_prolific_summary.csv")
+write.csv(jatos_students[,-c(2:10,12,16:47,49,50,52,53,seq(56,66,2),70,72,73,seq(76,94,2))],
+          "data/processed/dice-task_students_summary.csv")
 
 # Create full-data file
+write.csv(jatos_hamburg, "data/processed/dice-task_hamburg_full.csv")
+write.csv(jatos_prolific, "data/processed/dice-task_prolific_full.csv")
+write.csv(jatos_students, "data/processed/dice-task_students_full.csv")
 
 # Create meta file
 write.csv(metaDiceTask, "data/processed/meta_dice-task.csv")
