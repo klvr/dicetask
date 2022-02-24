@@ -318,7 +318,7 @@ trial4min <- ((boxTask[,4]<5) == boxTask[,8])
 trial4min <- replace(trial4min, boxTask[,4]==0, NA)
 boxTask$wentMin <- rowMeans(cbind(trial1min, trial2min, trial3min, trial4min), na.rm = TRUE)
 
-# Update metaFile with n incomplete data
+# Update meta file with n incomplete data
 ## '0' draws
 meta0drawtrials <- sum(boxTask[,c(1,2,3,4)]==0)
 metaUnique0drawtrials <- sum(rowSums(boxTask[,c(1,2,3,4)]==0)>0)
@@ -330,6 +330,14 @@ metaBoxTask <- rbind(metaBoxTask, c(meta0drawtrials, "Zero draw trials"), c(meta
                      "Participants with zero draw trials"), c(metaMissingResp,
                       "Missing resp trials"), c(metaUniqueMissingResp, 
                       "Participants with missing resp trials"))
+
+# Update meta file to display number of trials and unique participants excluded in 'E'-variables
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeDtD1), "Trial 1 DtD exclusion"))
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeDtD2), "Trial 2 DtD exclusion"))
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeDtD3), "Trial 3 DtD exclusion"))
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeDtD4), "Trial 4 DtD exclusion"))
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeOverall>0), "Participants with DtD exclusion"))
+metaBoxTask <- rbind(metaBoxTask, c(sum(boxTask$excludeOverall==1), "Participants with full DtD exclusion"))
 
 # 08 Output CSV-files for all data in 'processed' --------------------------------------------------
 
@@ -349,6 +357,11 @@ colnames(metaBoxTask) <- c("N affected","Reason","Sample pool")
 metaCourse <- sum(row.names(boxTask)=="2334")
 metaBoxTask <- rbind(metaBoxTask, c(metaCourse, "Participants excluded for science", "Students_2"))
 boxTask <- boxTask[row.names(boxTask)!="2334",]
+
+# Replace all NaN-values with NA
+for (i in 1:ncol(boxTask)) {
+  boxTask[,i] <- replace(boxTask[,i], is.nan(boxTask[,i]), NA)
+    }
 
 # Create summary-file
 write.csv(boxTask[,-c(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,19,21,23,25,27)],
