@@ -1,8 +1,11 @@
 #Data-extraction Dice-task
 
 #Load files
-filepath <- paste(getwd(), "/data/", sep="")
-files <- paste(filepath, list.files(filepath), sep="")
+filepath <- paste(getwd(), "/data/raw/jatos/", sep="")
+#files <- c("data/raw/comp/jatos/hamburg/jatos_hamburg.txt")
+#files <- c("data/raw/comp/jatos/prolific/jatos_prolific_1.txt")
+#files <- c("data/raw/comp/jatos/prolific/jatos_prolific_2.txt")
+files <- c("data/raw/comp/jatos/students/jatos_students.txt")
 
 #Set-up data-file
 data <- row.names("")
@@ -10,20 +13,23 @@ data <- row.names("")
 #Read file-by-file
 while(length(files)>0){
   file <- read.delim(files[1], header = FALSE)
-  cases <- grep(pattern="studyId:", file[,1])
+  pattern <- "\"studyId\":\"210\",\"qualtricsID\":\""
+  cases <- grep(pattern="qualtricsID", file[,1])
   cases <- c(cases, (nrow(file)+1))
   
   #Read participant-by-participant
   while(length(cases)>1){
     participant <- as.data.frame(file[cases[1]:(cases[2]-1),1])
     participant[,1] <- as.character(participant[,1])
+    
 
     #StudyID
     studyid <- strsplit(strsplit(participant[,1], split = "*studyId:")[[1]][2], split =",")[[1]][1]
 
     #QualtricsID
     qualtricsid <- strsplit(strsplit(participant[,1], split = "*qualtricsID:*")[[1]][2], split =",")[[1]][1]
-
+    print(qualtricsid)
+    
     #Trial1
     #Pre-collection1
       precoll1 <- strsplit(strsplit(participant[grep(pattern = "componentPos:3,", x = participant[,1]),1], split = "value:")[[1]][2], split = "^")[[1]][1]
@@ -107,4 +113,3 @@ while(length(files)>0){
   }
   files <- files[-1]
 }
-write.csv(data, file = "Cleaned data/data.csv")
