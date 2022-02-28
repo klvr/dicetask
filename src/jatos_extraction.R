@@ -180,7 +180,7 @@ filename <- unlist(strsplit(unlist(strsplit(jatFiles[x], "/"))[2], ".txt"))
 assign(filename, diceTask)
 
 # Save cleaned raw-data in 'temp'
-write.csv(diceTask, paste("data/temp/", filename, "_temp.csv", sep=""))
+write.csv(diceTask, paste("data/temp/", filename, "_raw.csv", sep=""))
 
 # Reset diceTask-variable
 diceTask <- NULL          
