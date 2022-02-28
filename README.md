@@ -52,10 +52,12 @@
     │   │       |   qualtrics_students_2.csv  - Student qualtrics form part 2 file.
     │   │       |   qualtrics_students_3.csv  - Student qualtrics form part 3 file.
     │   │       |
-    |   |       └───students2/
+    |   |       └───students2/ - From student 2 sample.
     │   │   
-    │   └───temp/ - Temporary files from scripts, not to be used directly in analyses.
+    │   └───temp/ - Temporary files from scripts.
     │       Happens automatically when running scripts. This section will not be updated.
+    |       '_temp'-files are used in subsequent data-extraction/cleanup.
+    |       '_raw'-files are not used further.
     │
     └───output/ - All output files (excluding pure processed data files).
     │
