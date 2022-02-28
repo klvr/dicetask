@@ -60,13 +60,13 @@ qualtrics_students_2 <- qualtrics_students_2[!pilotStudents,]
 consentStudents <- qualtrics_students_1$QID51 ==
   "I am willing to participate in the research project."
 qualtrics_students_1 <- qualtrics_students_1[consentStudents,]
-metaQualtrics <- rbind(metaQualtrics, c(sum(consentStudents == FALSE), "no consent", "students_1"))
+metaQualtrics <- rbind(metaQualtrics, c(sum(consentStudents == FALSE), "no consent", "Students_1"))
 
 # Remove (self-)terminated runs (due to being on mobile)
 mobileStudents <- qualtrics_students_1$QID113 == 
   "Yes, and I'm not using Safari"
 qualtrics_students_1 <- qualtrics_students_1[mobileStudents,]
-metaQualtrics <- rbind(metaQualtrics, c(sum(mobileStudents == FALSE), "on mobile", "students_1"))
+metaQualtrics <- rbind(metaQualtrics, c(sum(mobileStudents == FALSE), "on mobile", "Students_1"))
 
 # Remove aborted runs (all data missing from ID and out)
 abortedStudents <- as.numeric(qualtrics_students_1$QID58_TEXT) > 1
@@ -97,12 +97,12 @@ qualtrics_students_2_c <- qualtrics_students_2_c[!pilotStudents2,]
 consentStudents2 <- qualtrics_students_2_a$consent2.== 
   "I am willing to participate in the research project."
 qualtrics_students_2_a <- qualtrics_students_2_a[consentStudents2,]
-metaQualtrics <- rbind(metaQualtrics, c(sum(consentStudents2 == FALSE), "no consent", "students_2"))
+metaQualtrics <- rbind(metaQualtrics, c(sum(consentStudents2 == FALSE), "no consent", "Students_2"))
 
 # Remove (self-)terminated runs (due to being on mobile)
 mobileStudents2 <- qualtrics_students_2_a$browser1. == "Yes, and I'm not using Safari"
 qualtrics_students_2_a <- qualtrics_students_2_a[mobileStudents2,]
-metaQualtrics <- rbind(metaQualtrics, c(sum(mobileStudents2== FALSE), "on mobile", "students_2"))
+metaQualtrics <- rbind(metaQualtrics, c(sum(mobileStudents2== FALSE), "on mobile", "Students_2"))
 
 # Remove aborted runs (all data missing from ID and out)
 abortedStudents2 <- qualtrics_students_2_a$FL_5_DO > 1
@@ -118,7 +118,7 @@ sameID <- cbind(qualtrics_students_2_a[,c(13,16,17,18)],
 ### '6519' responded 'okay' rather than repeating ID, not change needed.
 ### '6783' responded '1867' in one instance. Look for this ID (1867) in other tasks
 
-# 04 Removal of unnecessary & empty variables ------------------------------------------------------
+# 05 Removal of unnecessary & empty variables ------------------------------------------------------
 
 qualtrics_prolific <- qualtrics_prolific[,-c(1:11,14:16)]
 qualtrics_students_1 <- qualtrics_students_1[,-c(1:16,19:21,26,27,309:351,356,357)]
@@ -132,12 +132,12 @@ qualtrics_students_2_c <- qualtrics_students_2_c[,-c(1:10)]
 ## This data was collected during a seperate experiment from someone else
 qualtrics_students_2_nfc <- qualtrics_students_2_nfc[,c(13,93:110)]
 
-# 05 Set-up meta-data files ------------------------------------------------------------------------
+# 06 Set-up meta-data files ------------------------------------------------------------------------
 
 metaQualtrics <- as.data.frame(metaQualtrics)
 colnames(metaQualtrics) <- c("N affected", "Reason", "Sample pool")
 
-# 06 Saving of temp-data and meta-data -------------------------------------------------------------
+# 07 Saving of temp-data and meta-data -------------------------------------------------------------
 
 # Saving temp files
 write.csv(qualtrics_prolific, file = "data/temp/qualtrics_prolific_temp.csv", row.names = FALSE)
