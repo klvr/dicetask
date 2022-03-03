@@ -64,7 +64,11 @@
     └───presentations/ - Not pushed to GitHub, markdown files and images for presentations.
     │
     └───src/ - All script files (function, extraction, clearning, analyses and plots).
-    |   |      Run order in brackets (to go from raw data -> summarized -> analyses)
+    |   |      Run order in brackets:
+    |   |      1-4: Extraction & summarizing raw data (source-wise) - Outputs in 'data/*'
+    |   |      5:   Merging extracted data (across sources).        - Outputs in 'data/processed/'
+    |   |      6-X: Analyses of merged data (for each experiment).  - Outputs in 'output/*'
+    |   |      Y-Z: Plots to be used in the articles or otherwise.  - Outputs in 'output/*'
     |   │   jatos_extraction.R      - Script for extracting and summarising Dice-task files.    [3]
     |   |   merging_data.R          - Script for merging data across tasks.                     [5]
     |   |   pavlovia_extraction.R   - Script for extracting and summarising Box-task files.     [4]
