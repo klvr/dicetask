@@ -64,14 +64,20 @@
     └───presentations/ - Not pushed to GitHub, markdown files and images for presentations.
     │
     └───src/ - All script files (function, extraction, clearning, analyses and plots).
-    |   │   jatos_extraction.R      - Script for extracting and summarising Dice-task files.
-    |   |   pavlovia_extraction.R   - Script for extracting and summarising Box-task files.
-    |   |   qualtrics_cleanup.R     - Script for cleaning up qualtrics files before extraction.
+    |   |      Run order in brackets (to go from raw data -> summarized -> analyses)
+    |   │   jatos_extraction.R      - Script for extracting and summarising Dice-task files.    [3]
+    |   |   merging_data.R          - Script for merging data across tasks.                     [5]
+    |   |   pavlovia_extraction.R   - Script for extracting and summarising Box-task files.     [4]
+    |   |   qualtrics_cleanup.R     - Script for cleaning up qualtrics files before extraction. [1]
+    |   |   qualtrics_extraction.R  - Script for extracting and summarising qualtrics files.    [2]
     |   │
     |   └───functions/ - Functions scripts.
     |       duplicate.detective.R   - Helper script to look for non-unique participants.
     |       recoding.cape.R         - Function-script for recoding and summary of CAPE.
-    |       recoding.gender.R       - Function-script for recoding gender. 
+    |       recoding.ellsdyn.R      - Function-script for ambiguity threshold in dynamic Ellsberg.
+    |       recoding.fdc.R          - Function-script for recoding and summary of 5DimCuriosity.
+    |       recoding.gender.R       - Function-script for recoding gender.
+    |       recoding.ius.R          - Function-script for recoding and summary of Intol of Uncert.
     |       recoding.nfc.R          - Function-script for recoding and summary of NfC.
     |       recoding.rq.R           - Function-script for recoding of RQ items.
     |       recoding.time.R         - Function-script for recoding time on page.
