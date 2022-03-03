@@ -1566,8 +1566,8 @@ students2_diceDiff <- merge(students2_diceDiffA[!is.na(students2_diceDiffA$diceD
                             students2_diceDiffB[!is.na(students2_diceDiffB$diceDiff),], 
                            by = 1, all.x = TRUE, all.y = TRUE)
 ## Merge into one column and rename variables
-students2_diceDiff$diceDiff.x <- rowSums(cbind(as.numeric(students2_diceDiff[,2]),
-                                             as.numeric(students2_diceDiff[,3])), na.rm = TRUE)
+students2_diceDiff[is.na(students2_diceDiff$diceDiff.x),2] <- students2_diceDiff[is.na(
+  students2_diceDiff$diceDiff.x),3]
 students2_diceDiff <- students2_diceDiff[,-3]
 colnames(students2_diceDiff) <- c(namesMisc[1], namesDebrief[3])
 
@@ -1577,8 +1577,8 @@ students2_diceWL <- merge(students2_diceWLA[!is.na(students2_diceWLA$diceWL),],
                             students2_diceWLB[!is.na(students2_diceWLB$diceWL),], 
                             by = 1, all.x = TRUE, all.y = TRUE)
 ## Merge into one column and rename variables
-students2_diceWL$diceWL.x <- rowSums(cbind(as.numeric(students2_diceWL[,2]),
-                                               as.numeric(students2_diceWL[,3])), na.rm = TRUE)
+students2_diceWL[is.na(students2_diceWL$diceWL.x),2] <- students2_diceWL[is.na(
+  students2_diceWL$diceWL.x),3]
 students2_diceWL <- students2_diceWL[,-3]
 colnames(students2_diceWL) <- c(namesMisc[1], namesDebrief[4])
 
